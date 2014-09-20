@@ -27,10 +27,11 @@ while ~JoyMainSwitch
     joystick        = joymex2('query',0);       % sp?r etter data fra joystick
     JoyMainSwitch   = joystick.buttons(1);
     JoyForover(i)   = -joystick.axes(2)/327.68; % 32768 fremover, -32768 bakover
+    JoySide(i)      = joystick.axes(1)/327.68 % 32768 høyre, -32768 venstre
     
     %% beregner motorpaadrag og lagrer i vektor
-    PowerB(i) = JoyForover(i);
-    PowerC(i) = JoyForover(i);
+    PowerB(i) = (JoyForover(i)-JoySide(i))/2;
+    PowerC(i) = (JoyForover(i)+JoySide(i))/2;
     
     %% set output data
     motorB.Power = PowerB(i);
