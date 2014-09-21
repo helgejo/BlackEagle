@@ -7,7 +7,7 @@ clear all                       % sletter alle variable
 handle_NXT = COM_OpenNXT();     % etablerer nytt h?ndtak
 COM_SetDefaultNXT(handle_NXT);	% setter globalt standard-h?ndtak
 
-%% Initialiserer motor B og C
+%% Initialiserer motor A
 %  #2 Introduksjon til MATLAB, LEGO NXT og RWTH Mindstorms toolbox
 %
 motorB = NXTMotor('B','SmoothStart',true); % initialiserer motor B
@@ -31,7 +31,7 @@ while ~JoyMainSwitch
     AlarmOn         = joystick.buttons(5);
     AlarmOff        = joystick.buttons(6);
     JoyForover(i)   = -joystick.axes(2)/327.68; % 32768 fremover, -32768 bakover
-    JoySide(i)      = joystick.axes(1)/327.68 % 32768 h?yre, -32768 venstre
+    JoySide(i)      = joystick.axes(1)/327.68 % 32768 høyre, -32768 venstre
     
     %% beregner motorpaadrag og lagrer i vektor
     PowerB(i) = (JoyForover(i)-JoySide(i))/2;
@@ -46,9 +46,8 @@ while ~JoyMainSwitch
         while ~AlarmOff
             joystick        = joymex2('query',0);
             AlarmOff        = joystick.buttons(6);
-            NXT_PlayTone(1200,1000);
-            pause(0.5)
-            NXT_PlayTone(700,1000);
+            NXT_PlayTone(1400,100);
+            NXT_PlayTone(400,100);
         end
     end
     if Horn > 0

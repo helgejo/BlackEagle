@@ -31,7 +31,7 @@ handle = COM_OpenNXT();
 % at this place we could call COM_SetDefaultNXT(handle);
 
 % Play tone with frequency 800Hz and duration of 500ms. 
-NXT_PlayTone(800,500, handle);
+NXT_PlayTone(400,500, handle);
 
 % Get current battery level. 
 voltage = NXT_GetBatteryLevel(handle)
