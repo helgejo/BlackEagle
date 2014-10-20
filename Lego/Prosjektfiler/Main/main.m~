@@ -1,12 +1,10 @@
 %%
 %V01 av main scriptet som styrer alt
 % TODO
-    % LAG GUI - OK
-    % LAG MAIN SOM FUNCTION
+    % LAG SOM FUNCTION
     % INITIALISER JOYSTICK
     % LAG FUNKSJONER AV INT, DER, FILTRERING
-    % VIS HASTIGHET
-    % HANDLES TIL PLOTTING
+    % 
 
 %% Initialiserer NXT
 COM_CloseNXT all                % lukker alle NXT-h?ndtak 
