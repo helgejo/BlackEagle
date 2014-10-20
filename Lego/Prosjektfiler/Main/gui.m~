@@ -1,4 +1,6 @@
-%% GUI to create choices for various projects
+%% Explanation here
+
+% while loop for at avslutt knappen skal virke
 n=1
 while n>0
     switch menu('Int100 prosjekt', 'Robot kj?ring', 'Andre program', 'Avslutt')
@@ -22,7 +24,7 @@ while n>0
             while m2>0
                 switch menu('Int100 prosjekt', 'CannonGame', 'MusicGames', 'RobotFollow', 'Tilbake')
                     case 1
-                        cannonGame()
+                        %Manuell kj?ringsrutine
                     case 2
                         %Auto kj?ringsrutine
                     case 3
