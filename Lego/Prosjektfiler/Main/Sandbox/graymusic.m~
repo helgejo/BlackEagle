@@ -19,15 +19,15 @@ OpenLight(SENSOR_3,'ACTIVE'); %Lys sensor
 
 %% Initialiser variabler
 %tid=[0]; %tidsvektor
-paadragB = 0; %p?drag motor B
-paadragC = 0; %p?drag motor C
-lys = 0; %m?ling fra lyssensor
-lysFilt=0; %filtrert lysm?ling
+paadragB = [0]; %p?drag motor B
+paadragC = [0]; %p?drag motor C
+lys = [0]; %m?ling fra lyssensor
+lysFilt=[0]; %filtrert lysm?ling
 startTid=cputime; %starttidspunkt
 RoboSpeed = 50; %Robot speed m/s
 TotLen = 0; % Total length robot should drive
 WheelCirc = 56*pi; % Calculate wheel circumference
-LenRead = 0; % Measured Length
+
 
 %% Menu Choices
 switch menu('Choose length robot should drive to measure: ', 'A3', 'A4', 'A5','Back')
@@ -61,7 +61,7 @@ RoboPrec = input(Precprompt)
         RoboPrec = 5;
     end
 %% Drive and collect measurments
-while LenRead < TotLen
+while TotLen
     % Tids beregninger
     %tid(end+1)=cputime-startTid;
     

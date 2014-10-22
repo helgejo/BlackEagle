@@ -1,4 +1,4 @@
-%% GUI to create choices for various projects
+%% GUI to create choices for the various projects
 n=1
 while n>0
     switch menu('Int100 prosjekt', 'Robot kj?ring', 'Andre program', 'Avslutt')
@@ -24,9 +24,9 @@ while n>0
                     case 1
                         cannonGame()
                     case 2
-                        %Auto kj?ringsrutine
+                        %MusicGames
                     case 3
-                        %Verifiserings kj?ringsrutine
+                        %RobotFollow
                     case 4
                         m2 = 0;
                 end

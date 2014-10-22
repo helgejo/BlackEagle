@@ -1,6 +1,6 @@
-function [ output_args ] = joymusic( input_args )
+function [] = joymusic()
 %JOYMUSIC spiller musikk med joystick
-%   Detailed explanation goes here
+
 
 
 end

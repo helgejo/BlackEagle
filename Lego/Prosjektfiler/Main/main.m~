@@ -1,23 +1,21 @@
+function [] = main()
 %%
 %V01 av main scriptet som styrer alt
 % TODO
-    % LAG SOM FUNCTION
-    % INITIALISER JOYSTICK
-    % LAG FUNKSJONER AV INT, DER, FILTRERING
-    % 
+    % VIS HASTIGHET 
+    % HANDLES TIL PLOTTING
 
 %% Initialiserer NXT
-COM_CloseNXT all                % lukker alle NXT-h?ndtak 
-close all                       % lukker alle figurer  
-clear all                       % sletter alle variable 
+initNXT();
 handle_NXT = COM_OpenNXT();     % etablerer nytt h?ndtak
 COM_SetDefaultNXT(handle_NXT);	% setter globalt standard-h?ndtak
 
-% Bruker input
+%% Bruker input for hvor ofte grafene skal oppdateres
 plotFrek=input('Tast inn et tall fra 0 til 100000. H?yere tall gir bedre styring via joystick, mens lavere gir oftere oppdatering av figurere og grafer: ');
 
 %% Initialiserer sensorer
 OpenLight(SENSOR_3,'ACTIVE'); %Lys sensor
+OpenAccelerator(SENSOR_4); %accelerator
 
 %% Initialiserer motorer
 
@@ -28,6 +26,8 @@ motorC = NXTMotor('C','SmoothStart',true); % Init motor c (venste)
 joymex2('open',0);                  % ?pner joystick
 joystick = joymex2('query',0);      % sp?r etter data fra joystick
 JoyMainSwitch = joystick.buttons(1);   % Knapp 1, for ? stoppe program
+initFB = -joystick.axes(2); % henter joystick posisjon p? "y"-aksen
+initS = joystick.axes(1); % henter joystick posissjon p? "x"-aksen
 
 %% Initialiserer figurer
 figure(1); %Main figur, Totalt avvik, Rettning p? n?v?rende avvik, Verdi, delta T
@@ -54,6 +54,8 @@ verdi=[0]; %vektor for verdien som blir m?lt
 deriv=[0]; %vektor for de deriverte av avviket
 rettning=[0]; %vektor som beskriver rettning p? avviket.
 startTid=cputime; %starttidspunkt
+speed= 0;
+
 %% Main
 while run
     % Tids beregninger
@@ -69,7 +71,7 @@ while run
     avvikA(end+1)=intFunk(tid,avvikL)+avvikA(end);
     avvikA2(end+1)=abs(intFunk(tid,avvikL))+avvikA2(end);
     
-    %integrasjon av lysignalet
+    %Derivasjon av lysignalet
     deriv(end+1)=derivFunk(tid,avvikL);
     
     %Har roboten rettning mot lysere eller m?rkere side
@@ -80,22 +82,26 @@ while run
     
     % les joystick bevegelser
     joystick = joymex2('query',0);
-    joyFB(end+1) = -joystick.axes(2)/327.68; % henter joystick posisjon p? "y"-aksen
-    joyS(end+1) = joystick.axes(1)/327.68; % henter joystick posissjon p? "x"-aksen
+    joyFB(end+1) = -joystick.axes(2)-initFB/327.68; % henter joystick posisjon p? "y"-aksen
+    joyS(end+1) = joystick.axes(1)-initS/327.68; % henter joystick posissjon p? "x"-aksen
     
     %Filtrere joystick signalet
     joyFB(end) = filtJoy([joyFB(end-1),joyFB(end)]);
     joyS(end) = filtJoy([joyS(end-1),joyS(end)]);
     
-    %beregner motor p?drag
-    [paadragB(end+1),paadragC(end+1)] = motorPaadrag(joyFB(end),joyS(end));
+    %Beregn motor p?drag
+    %Alternativ ved andre forhold mellom fram/bak og sideveis:
+    % [paadragB(end+1),paadragC(end+1)] = motorPaadrag(joyFB(end),joyS(end));
+    paadragB(end+1) = (joyFB(end)-joyS(end))/2;
+    paadragC(end+1) = (joyFB(end)+joyS(end))/2;
     
     %sender til motorene
     motorB.Power = paadragB(end);
     motorC.Power = paadragC(end);
     motorB.SendToNXT();
     motorC.SendToNXT();
-    
+    speed(end+1) = GetAccelerator(SENSOR_4);
+    h = msgbox(
     if plotTeller > plotFrek
         % Plot figurer
         % Plot figur 1
@@ -187,6 +193,7 @@ motorC.Stop;
 
 % Steng kobling til sensorer
 CloseSensor(SENSOR_3);
+CloseSensor(SENSOR_4);
 
 % Fjern joystick
 clear joymex2
@@ -263,3 +270,6 @@ subplot(2,1,2)
 plot(tid,deriv);
 title('Derivert av filtrert lysverdi');
 axis([0,tid(end),-1000,1000])
+
+initNXT();
+end
