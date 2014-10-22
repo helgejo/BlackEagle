@@ -4,10 +4,6 @@ function [] = graymusic()
 %   repr. en tone, og den fysiske lengden av gr?tonene p? arket repr.
 %   tidslengde som hver tone skal spilles. La roboten kj?re over arket og
 %   spille melodien
-%TODO
-% La roboten kj?re til bruker trykker p? knappen for ? spille melodi
-% Lag en while loop som spiller av melodi, hvor lengde av gr?tt omr?de er
-% registrert og blir brukt som tid mot tone som er lysm?ling.
 
 %% Initialiserer NXT
 initNXT();
@@ -18,76 +14,112 @@ COM_SetDefaultNXT(handle_NXT);	% setter globalt standard-h?ndtak
 OpenLight(SENSOR_3,'ACTIVE'); %Lys sensor
 
 %% Initialiser variabler
-%tid=[0]; %tidsvektor
-paadragB = 0; %p?drag motor B
-paadragC = 0; %p?drag motor C
 lys = 0; %m?ling fra lyssensor
 lysFilt=0; %filtrert lysm?ling
 startTid=cputime; %starttidspunkt
 RoboSpeed = 50; %Robot speed m/s
 TotLen = 0; % Total length robot should drive
-WheelCirc = 56*pi; % Calculate wheel circumference
-LenRead = 0; % Measured Length
+LenRead=0;
+SoundLen= 0;
+RoboPrec= 0;
+global WheelCirc = 56*pi; % Calculate wheel circumference
+Mlen= 0;
+Mtone= 0;
+tmpDist= 0;
+      
 
-%% Menu Choices
-switch menu('Choose length robot should drive to measure: ', 'A3', 'A4', 'A5','Back')
-    case 1
-        TotLen=420;
-    case 2
-        TotLen=300;
-    case 3
-        TotLen=210;
-    case 4
-        main();
-end
+%% Functions
 
-% Convert input to degrees
-TotLenDeg = (TotLen/WheelCirc)*360;
-
-Lenprompt = 'How long should the sound play compared to distance? Default is 1 (1mm=1ms). Higher number give longer tones';
-SoundLen = input(Lenprompt)
-    if isempty(SoundLen)
-        SoundLen = 1;
-    end 
-Speedprompt = 'Input robot speed? Default is 50 and maks is 100';
-RoboSpeed = input(Speedprompt) 
-    if or(isempty(RoboSpeed),RoboSpeed > 100) 
-        RoboSpeed = 50;
+    function [out] = LtoHZ(l)
+        x= 20000/1023;
+        out = x * l
     end
     
-Precprompt = 'Input robot precision in degrees? Default is 5 and maks is 360';
-RoboPrec = input(Precprompt) 
-    if or(isempty(RoboPrec),RoboPrec > 360) 
-        RoboPrec = 5;
+    function [out] = Dist2Deg(dist)
+        out = (dist/WheelCirc)*360;
     end
+    
+    function [out] = Deg2Dist(deg)
+        out = WheelCirc*(deg/360);
+    end
+
+    function out = Lfilter(in)
+        %Filtrerer en input vektor til et tall ut  
+        temp = in(end)-in(end-1);
+        % if change is less than +-5 then take last value instead
+        if temp < 5 && temp > -5
+            out = in(end-1);
+        % filter joy input
+        else
+            out = in;
+        end
+    end
+
+    function [TotLen,SoundLen,RoboSpeed,RoboPrec]=menuCh()
+        % Menu Choices
+
+        switch menu('Choose length robot should drive to measure: ', 'A3', 'A4', 'A5','Back')
+            case 1
+                TotLen=420; %papersize in mm
+            case 2
+                TotLen=300; %papersize in mm
+            case 3
+                TotLen=210; %papersize in mm
+            case 4
+                main();
+        end
+
+        Lenprompt = 'How long should the sound play compared to distance? Default is 10 (1mm=10ms). Higher number give longer tones';
+        SoundLen = input(Lenprompt)
+            if isempty(SoundLen)
+                SoundLen = 10;
+            end
+            
+        Speedprompt = 'Input robot speed? Default is 50 and maks is 100';
+        RoboSpeed = input(Speedprompt) 
+            if or(isempty(RoboSpeed),RoboSpeed > 100) 
+                RoboSpeed = 50;
+            end
+
+        Precprompt = 'Input robot precision in mm? Default is 5';
+        RoboPrec = input(Precprompt) 
+            if or(isempty(RoboPrec),RoboPrec > 360) 
+                RoboPrec = 5;
+            end
+        RoboPrec = Dist2Deg(RoboPrec)
+    end
+    
+%% Getting everything ready
+     
+[TotLen, SoundLen, RoboSpeed,RoboPrec] = menuCh(); %get user input
+TotLenDeg = Dist2Deg(TotLen); % Convert length input to degrees
+motorB.ResetPosition(); % nullstill vinkelteller
+motorC.ResetPosition(); % nullstill vinkelteller
+lys = GetLight(SENSOR_3); % Get first light reading
+
 %% Drive and collect measurments
 while LenRead < TotLen
-    % Tids beregninger
-    %tid(end+1)=cputime-startTid;
-    
-    % les lys sensor
-    lys(end+1)=GetLight(SENSOR_3);
-    lysFilt(end+1)=filtLys([lysFilt(end),lys(end)]);
-    
-    
-
-    
-    %Beregn motor p?drag
-    %Alternativ ved andre forhold mellom fram/bak og sideveis:
-    % [paadragB(end+1),paadragC(end+1)] = motorPaadrag(joyFB(end),joyS(end));
-    paadragB(end+1) = (joyFB(end)-joyS(end))/2;
-    paadragC(end+1) = (joyFB(end)+joyS(end))/2;
-    
-    %sender til motorene
-    motorB.Power = paadragB(end);
-    motorC.Power = paadragC(end);
+    motorB = NXTMotor('B','Power',RoboSpeed,'TachoLimit',RoboPrec);
+    motorC = NXTMotor('C','Power',RoboSpeed,'TachoLimit',RoboPrec);
     motorB.SendToNXT();
     motorC.SendToNXT();
- 
+    motorB.WaitFor();
+    motorC.WaitFor();
+    % Read light sensor and filter
+    lys(end+1)=GetLight(SENSOR_3);
+    lysFilt(end+1)=Lfilter([lysFilt(end),lys(end)]);
+    LenRead = LenRead + RoboPrec;
+    %check if light sensor data have changed
+    if lysFilt(end-1) == lysFilt(end)
+        tmpDist = tmpDist + RoboPrec;
+    else
+        Mlen(end+1) = Deg2Dist(tmpDist)*SoundLen;
+        Mtone(end+1) = LtoHZ(lysFilt(end-1));
+        tmpDist = 0;
 end
 
 %% Play music (play vector if possible else create function with while loop)
-NXT_PlayTone(lysFilt(end),SoundLen);
+NXT_PlayTone(Mtone,Mlen);
 
 %% Avslutt
 % Stop motorer

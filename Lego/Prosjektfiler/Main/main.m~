@@ -2,7 +2,9 @@ function [] = main()
 %%
 %V01 av main scriptet som styrer alt
 % TODO
-    % VIS HASTIGHET 
+    % VIS HASTIGHET - Have tried reading from accelerometer withouth testing
+    %   In case it does not work use distance from tacholimit as in
+    %   graymusic().
     % HANDLES TIL PLOTTING
 
 %% Initialiserer NXT
@@ -82,8 +84,8 @@ while run
     
     % les joystick bevegelser
     joystick = joymex2('query',0);
-    joyFB(end+1) = -joystick.axes(2)-initFB/327.68; % henter joystick posisjon p? "y"-aksen
-    joyS(end+1) = joystick.axes(1)-initS/327.68; % henter joystick posissjon p? "x"-aksen
+    joyFB(end+1) = (-joystick.axes(2)-initFB)/327.68; % henter joystick posisjon p? "y"-aksen
+    joyS(end+1) = (joystick.axes(1)-initS)/327.68; % henter joystick posissjon p? "x"-aksen
     
     %Filtrere joystick signalet
     joyFB(end) = filtJoy([joyFB(end-1),joyFB(end)]);
@@ -101,7 +103,7 @@ while run
     motorB.SendToNXT();
     motorC.SendToNXT();
     speed(end+1) = GetAccelerator(SENSOR_4);
-    h = msgbox(
+    msgbox(int2str(speed(end)),'Current Speed')
     if plotTeller > plotFrek
         % Plot figurer
         % Plot figur 1
