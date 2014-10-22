@@ -20,13 +20,13 @@ while n>0
         case 2
             m2 = 1
             while m2>0
-                switch menu('Int100 prosjekt', 'CannonGame', 'MusicGames', 'RobotFollow', 'Tilbake')
+                switch menu('Int100 prosjekt', 'CannonGame', 'graymusic', 'joymusic', 'Tilbake')
                     case 1
                         cannonGame()
                     case 2
-                        %MusicGames
+                        graymusic()
                     case 3
-                        %RobotFollow
+                        joymusic()
                     case 4
                         m2 = 0;
                 end
