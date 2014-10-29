@@ -3,11 +3,11 @@ function [motorB,motorC] = motorPaadrag(joyFB,joyS)
 %   Gir ut motorB og motorC pådrag som vektor
     temp = 0.5*abs(joyS); % halve abseluttverdien til sideveis posisjon
     if joyS > 0
-        motorB = joyFB - 0.8*temp; %Bidraget fra sideveis pos ytterligere redusert
+        motorB = joyFB - 0.5*temp; %Bidraget fra sideveis pos ytterligere redusert
         motorC = joyFB + temp;
     elseif joyS < 0
         motorB = joyFB + temp;
-        motorC = joyFB - 0.8*temp; %Bidraget fra sideveis pos ytterligere redusert
+        motorC = joyFB - 0.5*temp; %Bidraget fra sideveis pos ytterligere redusert
     else
         motorB = joyFB;
         motorC = joyFB;

@@ -28,14 +28,8 @@ motorC = NXTMotor('C','SmoothStart',true); % Init motor c (venste)
 joymex2('open',0);                  % ?pner joystick
 joystick = joymex2('query',0);      % sp?r etter data fra joystick
 JoyMainSwitch = joystick.buttons(1);   % Knapp 1, for ? stoppe program
-initFB = -joystick.axes(2); % henter joystick posisjon p? "y"-aksen
-initS = joystick.axes(1); % henter joystick posissjon p? "x"-aksen
-
-%% Initialiserer figurer
-figure(1); %Main figur, Totalt avvik, Rettning p? n?v?rende avvik, Verdi, delta T
-figure(2); %Motor figur, p?drag h?yre motor, p?drag venstre motor
-figure(3); %IntAvvik figur, Lysverdi fra sensor ink nullpunkt, avvik rundt nullpunkt, integrert lysverdi
-figure(4); %DerAvvik figur, lysverdi, filtrert lysverdi, filtrert derivert
+initFB = -joystick.axes(2)/327.68; % henter joystick posisjon p? "y"-aksen
+initS = joystick.axes(1)/327.68; % henter joystick posissjon p? "x"-aksen
 
 %% Initialiser variabler for main
 run = true; % loop variabel, settes til false for ? avslutte programmet
@@ -57,6 +51,87 @@ deriv=[0]; %vektor for de deriverte av avviket
 rettning=[0]; %vektor som beskriver rettning p? avviket.
 startTid=cputime; %starttidspunkt
 speed= 0;
+
+%% Initialiserer figurer
+close all;
+screen = get(groot,'screensize')
+figure('Name','Main figur','Position',[screen(3)/8, 4.5*screen(4)/8, 3*screen(3)/8, 2.8*screen(4)/8],'NumberTitle','off');%Main figur, Totalt avvik, Rettning p? n?v?rende avvik, Verdi, delta T
+%f1 = gcf;
+figure('Name','Motor figur','Position',[screen(3)/8, screen(4)/8,3*screen(3)/8, 2.8*screen(4)/8],'NumberTitle','off');%Motor figur, p?drag h?yre motor, p?drag venstre motor
+%f2 = gcf;
+figure('Name','Integrert Avvik figur','Position',[4.5*screen(3)/8, 4.5*screen(4)/8,3*screen(3)/8, 2.8*screen(4)/8],'NumberTitle','off');%IntAvvik figur, Lysverdi fra sensor ink nullpunkt, avvik rundt nullpunkt, integrert lysverdi
+%f3 = gcf;
+figure('Name','Derivert Avvik figur','Position',[4.5*screen(3)/8, screen(4)/8,3*screen(3)/8, 2.8*screen(4)/8],'NumberTitle','off');%DerAvvik figur, lysverdi, filtrert lysverdi, filtrert derivert 
+%f4 = gcf;
+
+% Plot figurer
+% Plot figur 1
+figure(1)
+%totalt avvik som areal
+subplot(4,1,1)
+plot1_1=plot(tid,avvikA2);
+title('Totalt avvik: Integrert lysverdi fra t=0 til t')
+%Rettning p? avvik
+subplot(4,1,2)
+plot1_2=plot(tid,rettning);
+title('Har roboten retning mot (-1)m?rk eller (1)lys side');
+%axis([0,tid(end),-1.5,1.5]);
+%Verdi i konkurasne ut fra gitt formel
+subplot(4,1,3)
+plot1_3=plot(tid,verdi);
+title('Verdi i konkuranse');
+%deltaTid
+subplot(4,1,4)
+plot1_4=plot(tid,deltaTid)
+title('Tidsendring pr tidsinkrement: deltaTid');
+
+% Plot figur 2
+figure(2)
+%P?drag motor B
+subplot(4,1,1)
+plot2_1=plot(tid,paadragB)
+title('Motor B');
+%P?drag motor C
+subplot(4,1,2)
+plot2_2=plot(tid,paadragC)
+title('Motor C');
+%Joystick posisjon i y-akse
+subplot(4,1,3)
+plot2_3=plot(tid,joyFB)
+title('Joystick posisjon Fremover/Bakover');
+%Joystick posisjon i x-akse
+subplot(4,1,4)
+plot2_4=plot(tid,joyS)
+title('Joystick posisjon Sideveis');
+
+%plot figur 3
+figure(3)
+%Lysverdi fra sensor og nullpunkt
+subplot(3,1,1)
+plot3_1=plot(tid,lys,[0,tid(end)],[lysNp , lysNp])
+title('Lysverdi fra sensor inklusiv nullpunk');
+%Filtrert lysverdi avviket fra 0 punkt
+subplot(3,1,2)
+plot3_2=plot(tid,avvikL);
+title('Avviket omkring nullpunktet');
+%integrert lysverdi
+subplot(3,1,3)
+plot3_4=plot(tid,avvikA);
+title('Integrert lysverdi = arealet A(t)')
+
+%Plot figur 4
+figure(4)
+%Lysverdi og Filtrert lysverdi
+subplot(2,1,1)
+plot4_1=plot(tid,lysFilt,tid,lys);
+title('Filtrert Lysm?lig: Bl?, Lysm?ling: R?d');
+%Derviert av filtrert lysverdi
+subplot(2,1,2)
+plot4_2=plot(tid,deriv);
+title('Derivert av filtrert lysverdi');
+%axis([0,tid(end),-1000,1000]);
+
+
 
 %% Main
 while run
@@ -84,8 +159,8 @@ while run
     
     % les joystick bevegelser
     joystick = joymex2('query',0);
-    joyFB(end+1) = (-joystick.axes(2)-initFB)/327.68; % henter joystick posisjon p? "y"-aksen
-    joyS(end+1) = (joystick.axes(1)-initS)/327.68; % henter joystick posissjon p? "x"-aksen
+    joyFB(end+1) = (-joystick.axes(2)/327.68)-initFB; % henter joystick posisjon p? "y"-aksen
+    joyS(end+1) = (joystick.axes(1)/327.68)-initS; % henter joystick posissjon p? "x"-aksen
     
     %Filtrere joystick signalet
     joyFB(end) = filtJoy([joyFB(end-1),joyFB(end)]);
@@ -93,92 +168,99 @@ while run
     
     %Beregn motor p?drag
     %Alternativ ved andre forhold mellom fram/bak og sideveis:
-    % [paadragB(end+1),paadragC(end+1)] = motorPaadrag(joyFB(end),joyS(end));
-    paadragB(end+1) = (joyFB(end)-joyS(end))/2;
-    paadragC(end+1) = (joyFB(end)+joyS(end))/2;
+    [paadragB(end+1),paadragC(end+1)] = motorPaadrag(joyFB(end),joyS(end));
+    %paadragB(end+1) = (joyFB(end)-joyS(end))/2;
+    %paadragC(end+1) = (joyFB(end)+joyS(end))/2;
     
     %sender til motorene
-    motorB.Power = paadragB(end);
-    motorC.Power = paadragC(end);
+    motorB.Power = paadragB(end)
+    motorC.Power = paadragC(end)
     motorB.SendToNXT();
     motorC.SendToNXT();
-    speed(end+1) = GetAccelerator(SENSOR_4);
-    msgbox(int2str(speed(end)),'Current Speed')
+    %speed(end+1) = GetAccelerator(SENSOR_4);
+    %msgbox(int2str(speed(end)),'Current Speed')
     if plotTeller > plotFrek
-        % Plot figurer
-        % Plot figur 1
-        figure(1)
-        %totalt avvik som areal
-        subplot(4,1,1)
-        plot(tid,avvikA2);
-        title('Totalt avvik: Integrert lysverdi fra t=0 til t')
+       % Plot figurer
+        set(plot1_1,'Xdata',tid,'Ydata',avvikA2);
         %Rettning p? avvik
-        subplot(4,1,2)
-        plot(tid,rettning);
-        title('Har roboten retning mot (-1)m?rk eller (1)lys side');
-        axis([0,tid(end),-1.5,1.5]);
+        set(plot1_2,'Xdata',tid,'Ydata',rettning);
         %Verdi i konkurasne ut fra gitt formel
-        subplot(4,1,3)
-        plot(tid,verdi);
-        title('Verdi i konkuranse');
+        set(plot1_3,'Xdata',tid,'Ydata',verdi);
         %deltaTid
-        subplot(4,1,4)
-        plot(tid,deltaTid)
-        title('Tidsendring pr tidsinkrement: deltaTid');
-
-        % Plot figur 2
-        figure(2)
-        %P?drag motor B
-        subplot(4,1,1)
-        plot(tid,paadragB)
-        title('Motor B');
-        %P?drag motor C
-        subplot(4,1,2)
-        plot(tid,paadragC)
-        title('Motor C');
-        %Joystick posisjon i y-akse
-        subplot(4,1,3)
-        plot(tid,joyFB)
-        title('Joystick posisjon Fremover/Bakover');
-        %Joystick posisjon i x-akse
-        subplot(4,1,4)
-        plot(tid,joyS)
-        title('Joystick posisjon Sideveis');
+        set(plot1_4,'Xdata',tid,'Ydata',deltaTid);
         
-        %plot figur 3
-        figure(3)
-        %Lysverdi fra sensor og nullpunkt
-        subplot(3,1,1)
-        plot(tid,lys,[0,tid(end)],[lysNp , lysNp])
-        title('Lysverdi fra sensor inklusiv nullpunk');
-        %Filtrert lysverdi avviket fra 0 punkt
-        subplot(3,1,2)
-        plot(tid,avvikL);
-        title('Avviket omkring nullpunktet');
-        %integrert lysverdi
-        subplot(3,1,3)
-        plot(tid,avvikA);
-        title('Integrert lysverdi = arealet A(t)')
-        
-        %Plot figur 4
-        figure(4)
-        %Lysverdi og Filtrert lysverdi
-        subplot(2,1,1)
-        plot(tid,lysFilt,tid,lys);
-        title('Filtrert Lysm?lig: Bl?, Lysm?ling: R?d');
-        %Derviert av filtrert lysverdi
-        subplot(2,1,2)
-        plot(tid,deriv);
-        title('Derivert av filtrert lysverdi');
-        axis([0,tid(end),-1000,1000]);
-        % reset plotcounter
+%         figure(1)
+%         %totalt avvik som areal
+%         subplot(4,1,1)
+%         plot(tid,avvikA2);
+%         title('Totalt avvik: Integrert lysverdi fra t=0 til t')
+%         %Rettning p? avvik
+%         subplot(4,1,2)
+%         plot(tid,rettning);
+%         title('Har roboten retning mot (-1)m?rk eller (1)lys side');
+%         axis([0,tid(end),-1.5,1.5]);
+%         %Verdi i konkurasne ut fra gitt formel
+%         subplot(4,1,3)
+%         plot(tid,verdi);
+%         title('Verdi i konkuranse');
+%         %deltaTid
+%         subplot(4,1,4)
+%         plot(tid,deltaTid)
+%         title('Tidsendring pr tidsinkrement: deltaTid');
+% 
+%         % Plot figur 2
+%         figure(2)
+%         %P?drag motor B
+%         subplot(4,1,1)
+%         plot(tid,paadragB)
+%         title('Motor B');
+%         %P?drag motor C
+%         subplot(4,1,2)
+%         plot(tid,paadragC)
+%         title('Motor C');
+%         %Joystick posisjon i y-akse
+%         subplot(4,1,3)
+%         plot(tid,joyFB)
+%         title('Joystick posisjon Fremover/Bakover');
+%         %Joystick posisjon i x-akse
+%         subplot(4,1,4)
+%         plot(tid,joyS)
+%         title('Joystick posisjon Sideveis');
+%         
+%         %plot figur 3
+%         figure(3)
+%         %Lysverdi fra sensor og nullpunkt
+%         subplot(3,1,1)
+%         plot(tid,lys,[0,tid(end)],[lysNp , lysNp])
+%         title('Lysverdi fra sensor inklusiv nullpunk');
+%         %Filtrert lysverdi avviket fra 0 punkt
+%         subplot(3,1,2)
+%         plot(tid,avvikL);
+%         title('Avviket omkring nullpunktet');
+%         %integrert lysverdi
+%         subplot(3,1,3)
+%         plot(tid,avvikA);
+%         title('Integrert lysverdi = arealet A(t)')
+%         
+%         %Plot figur 4
+%         figure(4)
+%         %Lysverdi og Filtrert lysverdi
+%         subplot(2,1,1)
+%         plot(tid,lysFilt,tid,lys);
+%         title('Filtrert Lysm?lig: Bl?, Lysm?ling: R?d');
+%         %Derviert av filtrert lysverdi
+%         subplot(2,1,2)
+%         plot(tid,deriv);
+%         title('Derivert av filtrert lysverdi');
+%         axis([0,tid(end),-1000,1000]);
+%         % reset plotcounter
          plotTeller = 0;
     else
         plotTeller = plotTeller + 1;
     end
         
     % Tegn figurer
-    drawnow
+    %drawnow
     
     %Sjekk om programmet skal avsluttes
     JoyMainSwitch   = joystick.buttons(1);
@@ -207,71 +289,71 @@ COM_CloseNXT(handle_NXT);
 % avsluttende tegning av alle figurer
 % Plot figurer
 % Plot figur 1
-figure(1)
-%totalt avvik som areal
-subplot(4,1,1)
-plot(tid,avvikA2);
-title('Totalt avvik: Integrert lysverdi fra t=0 til t')
-%Rettning p? avvik
-subplot(4,1,2)
-plot(tid,rettning);
-title('Har roboten retning mot (-1)m?rk eller (1)lys side');
-axis([0,tid(end),-1.5,1.5]);
-%Verdi i konkurasne ut fra gitt formel
-subplot(4,1,3)
-plot(tid,verdi);
-title('Verdi i konkuranse');
-%deltaTid
-subplot(4,1,4)
-plot(tid,deltaTid)
-title('Tidsendring pr tidsinkrement: deltaTid');
-
-% Plot figur 2
-figure(2)
-%P?drag motor B
-subplot(4,1,1)
-plot(tid,paadragB)
-title('Motor B');
-%P?drag motor C
-subplot(4,1,2)
-plot(tid,paadragC)
-title('Motor C');
-%Joystick posisjon i y-akse
-subplot(4,1,3)
-plot(tid,joyFB)
-title('Joystick posisjon Fremover/Bakover');
-%Joystick posisjon i x-akse
-subplot(4,1,4)
-plot(tid,joyS)
-title('Joystick posisjon Sideveis');
-
-%plot figur 3
-figure(3)
-%Lysverdi fra sensor og nullpunkt
-subplot(3,1,1)
-plot(tid,lys,[0,tid(end)],[lysNp , lysNp])
-title('Lysverdi fra sensor inklusiv nullpunk');
-%Filtrert lysverdi avviket fra 0 punkt
-subplot(3,1,2)
-plot(tid,avvikL);
-title('Avviket omkring nullpunktet');
-%integrert lysverdi
-subplot(3,1,3)
-plot(tid,avvikA);
-title('Integrert lysverdi = arealet A(t)')
-
-
-%Plot figur 4
-figure(4)
-%Lysverdi og Filtrert lysverdi
-subplot(2,1,1)
-plot(tid,lysFilt,tid,lys);
-title('Filtrert Lysm?lig: Bl?, Lysm?ling: R?d');
-%Derviert av filtrert lysverdi
-subplot(2,1,2)
-plot(tid,deriv);
-title('Derivert av filtrert lysverdi');
-axis([0,tid(end),-1000,1000])
-
-initNXT();
+% figure(1)
+% %totalt avvik som areal
+% subplot(4,1,1)
+% plot(tid,avvikA2);
+% title('Totalt avvik: Integrert lysverdi fra t=0 til t')
+% %Rettning p? avvik
+% subplot(4,1,2)
+% plot(tid,rettning);
+% title('Har roboten retning mot (-1)m?rk eller (1)lys side');
+% axis([0,tid(end),-1.5,1.5]);
+% %Verdi i konkurasne ut fra gitt formel
+% subplot(4,1,3)
+% plot(tid,verdi);
+% title('Verdi i konkuranse');
+% %deltaTid
+% subplot(4,1,4)
+% plot(tid,deltaTid)
+% title('Tidsendring pr tidsinkrement: deltaTid');
+% 
+% % Plot figur 2
+% figure(2)
+% %P?drag motor B
+% subplot(4,1,1)
+% plot(tid,paadragB)
+% title('Motor B');
+% %P?drag motor C
+% subplot(4,1,2)
+% plot(tid,paadragC)
+% title('Motor C');
+% %Joystick posisjon i y-akse
+% subplot(4,1,3)
+% plot(tid,joyFB)
+% title('Joystick posisjon Fremover/Bakover');
+% %Joystick posisjon i x-akse
+% subplot(4,1,4)
+% plot(tid,joyS)
+% title('Joystick posisjon Sideveis');
+% 
+% %plot figur 3
+% figure(3)
+% %Lysverdi fra sensor og nullpunkt
+% subplot(3,1,1)
+% plot(tid,lys,[0,tid(end)],[lysNp , lysNp])
+% title('Lysverdi fra sensor inklusiv nullpunk');
+% %Filtrert lysverdi avviket fra 0 punkt
+% subplot(3,1,2)
+% plot(tid,avvikL);
+% title('Avviket omkring nullpunktet');
+% %integrert lysverdi
+% subplot(3,1,3)
+% plot(tid,avvikA);
+% title('Integrert lysverdi = arealet A(t)')
+% 
+% 
+% %Plot figur 4
+% figure(4)
+% %Lysverdi og Filtrert lysverdi
+% subplot(2,1,1)
+% plot(tid,lysFilt,tid,lys);
+% title('Filtrert Lysm?lig: Bl?, Lysm?ling: R?d');
+% %Derviert av filtrert lysverdi
+% subplot(2,1,2)
+% plot(tid,deriv);
+% title('Derivert av filtrert lysverdi');
+% axis([0,tid(end),-1000,1000])
+COM_CloseNXT all
+%initNXT();
 end
