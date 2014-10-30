@@ -25,17 +25,20 @@ loops = [0];
 avgPT = [0];
 avgST = [0];
 avgRT = [0];
+
 subplot(3,1,1)
 hold on;
 plotplot = plot(loops,plotTime, '-b');
 xlabel('Number of times through the loop/size of time vector');
 ylabel('Time to plot in s');
+
 subplot(3,1,2)
 hold on;
 setPlot = plot(setTime, loops, '-r');
 set(setPlot,'Ydata', setTime, 'Xdata', loops);
 xlabel('Number of times through the loop/size of time vector');
 ylabel('Time to plot in s');
+
 subplot(3,1,3)
 hold on
 refreshPlot = plot(refreshTime, loops,'-g');
