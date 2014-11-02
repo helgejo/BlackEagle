@@ -1,21 +1,12 @@
 function [] = main()
-    %% Main funksjon
+    %% Auto kjørings funksjon
     % 02.11.2014
-    % Obligatorisk del av INT100 prosjekt 
+    % kreativ del av INT100 prosjekt 
     % Gruppe 1401
     % ***************************
-    % Det er gjort flere forbedringer til det som er obligatorisk
-    % - Funksjoner er brukt gjennomgående
-    % - Handles for oppdatering av grafer
-    % - Fartmåling
-    % - Grafisk visning av retning
-    % - GUI meny
-    % - Nullstilling av joystick ved initialisering
-    % ***************************
-    % Obligatorisk del ble først løst individuelt, koden ble deretter
-    % kombinert til en og utbedringer ble gjort i den konsoliderte koden.
-    % Alle har bidratt ihht avtalt arbeidsfordeling på main kode slik at
-    % alle skulle få god kjennskap til denne delen.
+    % Dette er en kreativ oppgave hvor roboten skal kjøre gjennom løypa
+    % automatisk. Her er joystick tatt ut og erstattet med kode som
+    % beregner motorpådrag i forhold til derivert. 
 
     %% Initialiserer NXT
     initNXT();
@@ -35,17 +26,8 @@ function [] = main()
     motorB = NXTMotor('B','SmoothStart',true);      % Init motor b (høyre)
     motorC = NXTMotor('C','SmoothStart',true);      % Init motor c (venste)
 
-    %% Initialiserer joystick
-    joymex2('open',0);                              % Åpner joystick
-    joystick = joymex2('query',0);                  % spør etter data fra joystick
-    JoyMainSwitch = joystick.buttons(1);            % Knapp 1, for å stoppe program
-    initFB = -joystick.axes(2)/327.68;              % henter joystick posisjon på "y"-aksen
-    initS = joystick.axes(1)/327.68;                % henter joystick posissjon på "x"-aksen
-
     %% Initialiser variabler
     run = true;                                     % loop variabel, settes til false for å avslutte programmet
-    joyFB = 0;                                      % vektor for forover/bakover bevegelse av joystick
-    joyS = 0;                                       % vektor for sideveis bevegelse av joystick
     tid=0;                                          % tidsvektor
     deltaTid=0;                                     % tidsendringsvektor
     paadragB = 0;                                   % pådrag motor B
@@ -148,15 +130,6 @@ function [] = main()
         % utregning av konkurranse poeng
         verdi(end+1)=tid(end)*100+avvikA2(end);
 
-        % les joystick bevegelser
-        joystick = joymex2('query',0);
-        joyFB(end+1) = (-joystick.axes(2)/327.68)-initFB; % henter joystick posisjon på "y"-aksen
-        joyS(end+1) = (joystick.axes(1)/327.68)-initS; % henter joystick posissjon på "x"-aksen
-
-        % Filtrere joystick signalet
-        joyFB(end) = filtJoy([joyFB(end-1),joyFB(end)]);
-        joyS(end) = filtJoy([joyS(end-1),joyS(end)]);
-
          % Sett bilde som viser retning basert på derivert
             % 1 angir retning mot lysere side (venstre)
          if rettning(end) > 0;
@@ -169,7 +142,7 @@ function [] = main()
         end
 
         % Beregn motor pådrag
-        [paadragB(end+1),paadragC(end+1)] = motorPaadrag(joyFB(end),joyS(end));
+        [paadragB(end+1),paadragC(end+1)] = ???; % Legg inn pådrag ihht retning
 
         % Send til motorene
         motorB.Power = paadragB(end);
@@ -209,8 +182,7 @@ function [] = main()
         drawnow
 
         %Sjekk om programmet skal avsluttes
-        JoyMainSwitch   = joystick.buttons(1);
-        if JoyMainSwitch
+        if ??? % Kan lengdemåling brukes? Evt. Når lysmåling plutselig peaker så stopper den. Beste er nok å bruke begge
             run = false;
         end    
     end
@@ -222,9 +194,6 @@ function [] = main()
 
     % Steng kobling til sensorer
     CloseSensor(SENSOR_3);
-    
-    % Fjern joystick
-    clear joymex2
 
     % Plott alt med de siste verdiene
     % avsluttende tegning av alle figurer
@@ -253,21 +222,13 @@ function [] = main()
     % Plot figur 2
     figure('Name','Retning','Position',[screen(3)/8, screen(4)/8,3*screen(3)/8, 2.8*screen(4)/8],'NumberTitle','off');
     %Pådrag motor B
-    subplot(4,1,1)
+    subplot(2,1,1)
     plot(tid,paadragB)
     title('Motor B');
     %Pådrag motor C
-    subplot(4,1,2)
+    subplot(2,1,2)
     plot(tid,paadragC)
     title('Motor C');
-    %Joystick posisjon i y-akse
-    subplot(4,1,3)
-    plot(tid,joyFB)
-    title('Joystick posisjon Fremover/Bakover');
-    %Joystick posisjon i x-akse
-    subplot(4,1,4)
-    plot(tid,joyS)
-    title('Joystick posisjon Sideveis');
 
     %plot figur 3
     figure('Name','Integrert Avvik','Position',[4.5*screen(3)/8, 4.5*screen(4)/8,3*screen(3)/8, 2.8*screen(4)/8],'NumberTitle','off');

@@ -1,3 +1,4 @@
+function []=ultrahandfollow()
 %% Oppgave 9 "Følg objekt+lys" fra "Forslag til kreative oppgaver"
 % ING100 Gruppe 1401 "Daniel Løvik" 2014
 
@@ -102,4 +103,4 @@ end
 
 % Close NXT connection.
 COM_CloseNXT(handle_NXT);
-
+end

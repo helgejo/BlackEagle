@@ -1,18 +1,14 @@
+function [] = reaction()
 %% Reaksjon test. 
-
-% Anders Svalestad 
-% 23.10.2014
-
+%   Gruppe 1401
+% Skrevet av: Anders Svalestad 
+%   23.10.2014
 
 %%
 clear
 clc
 
-
-
-
 % Starter While loop
-
 n=1;
 
 while n == 1;
@@ -22,7 +18,7 @@ while n == 1;
 % Lar bruker velge test eller avslutt
         valg = menu('Test Reaksjon','Finn bokstaven','Avslutt');
     if  valg == 1;
-    else break
+    else gui();
     end
 
 % Velger en vilkårlig bokstav mellom A og Z
@@ -47,7 +43,7 @@ while n == 1;
         disp (['Rigtig bokstav. Du brukte: ' num2str(tid) ' sekund']);
 % Hvis feil bokstav blir tastet, prøv igjen.
     else
-        disp ('Feil bokstav, prøv igjen') 
+        disp ('Feil bokstav, pr�v igjen') 
     end
 end
-
+end

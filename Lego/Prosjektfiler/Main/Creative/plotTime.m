@@ -1,4 +1,4 @@
-function PlotTime()
+function plotTime()
 %Illustrate how much time different ways of plotting takes pr run through the loop.
 %   plot() call each time
 %   set with datasets

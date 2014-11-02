@@ -1,37 +1,72 @@
-%% GUI to create choices for the various projects
+function [] = gui()
+%% GUI to create choices to select the various projects
 n=1
 while n>0
-    switch menu('Int100 prosjekt', 'Robot kj?ring', 'Andre program', 'Avslutt')
+    switch menu('Int100 prosjekt', 'Robot kjøring', 'Kreative oppgaver', 'Avslutt')
        case 1
            m1=1
            while m1>0
-            switch menu('Robot kj?ring', 'Manuell kj?ring', 'Automatisk kj?ring', 'Kj?ring med verifisering', 'Tilbake')
-                case 1
-                    main()
-                case 2
-                    %Auto kj?ringsrutine
-                case 3
-                    %Verifiserings kj?ringsrutine
-                case 4
-                    m1 = 0;
-            end
-           end
-            
+                switch menu('Robot kjøring', 'Manuell kjøring', 'Automatisk kjøring', 'Tilbake')
+                    case 1
+                        main()
+                    case 2
+                        auto()
+                    case 3
+                        m1 = 0; % Gå tilbake til forrige meny
+                end
+           end            
         case 2
             m2 = 1
-            while m2>0
-                switch menu('Int100 prosjekt', 'CannonGame', 'graymusic', 'joymusic', 'Tilbake')
+            while m2 > 0
+                switch menu('Kreative oppgaver', 'Spill', 'Musikk', 'Robo Fun','Plot test', 'Tilbake')
                     case 1
-                        cannonGame()
+                           m2_1 = 1
+                           while m2_1 > 0
+                                switch menu('Spill', 'CannonGame', 'Reaksjonstest', 'Tilbake')
+                                    case 1
+                                        cannonGame()
+                                    case 2
+                                        reaction()
+                                    case 3
+                                        m2_1 = 0; % Gå tilbake til forrige meny
+                                end
+                           end
                     case 2
-                        graymusic()
+                           m2_2 = 1
+                           while m2_2 > 0
+                                switch menu('Musikk', 'Robo Read 2Music', 'Piano', 'Joystick Play', 'Tilbake')
+                                    case 1
+                                        graymusic()
+                                    case 2
+                                        piano()
+                                    case 3
+                                        joymusic()
+                                    case 4
+                                        m2_2 = 0; % Gå tilbake til forrige meny
+                                end
+                           end
                     case 3
-                        joymusic()
+                           m2_3 = 1
+                           while m2_3 > 0
+                                switch menu('Robo Fun', 'Robo Clap', 'Robo Follow', 'Robo Wall', 'Tilbake')
+                                    case 1
+                                        lydsensorclap()
+                                    case 2
+                                        ultrahandfollow()
+                                    case 3
+                                        ultrawall()
+                                    case 4
+                                        m2_3 = 0; % Gå tilbake til forrige meny
+                                end
+                           end
                     case 4
-                        m2 = 0;
+                        plotTime();
+                    case 5
+                        m2 = 0; % Avslutt has been pressed n is set to 0 to end while loop and terminate
                 end
             end
        case 3
            n = 0; % Avslutt has been pressed n is set to 0 to end while loop and terminate
     end
+end
 end

@@ -112,7 +112,7 @@ answer=inputdlg(prompt,name,numlines,defaultanswer);
 %% Getting everything ready
      
 [TotLen, SoundLen, RoboSpeed,RoboPrec] = menuCh(); %get user input
-TotLenDeg = Dist2Deg(TotLen); % Convert length input to degrees
+%TotLenDeg = Dist2Deg(TotLen); % Convert length input to degrees
 motorB.ResetPosition(); % nullstill vinkelteller
 motorC.ResetPosition(); % nullstill vinkelteller
 lys = GetLight(SENSOR_3); % Get first light reading
@@ -147,8 +147,6 @@ hold on;
     motorC.SendToNXT();
 %% Drive and collect measurments
 while LenRead < TotLen;
-    tlen = 1000;
-    ttone= 200;
     % when lightsensor detects a major change larger than RoboPrec then 
     % get motor position and calculate distance
     % Play tone for distance and light(end-1)

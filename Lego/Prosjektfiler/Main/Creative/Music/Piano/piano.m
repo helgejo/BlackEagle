@@ -1,3 +1,4 @@
+function [] = piano() 
 %% NB Program fortsatt i BETA
 %% Oppgave 14 "Piano" fra "Forslag til kreative oppgaver"
 % ING100 Gruppe 1401 "Daniel Løvik" 2014
@@ -107,4 +108,5 @@ if k == 106
     sound(yG4)
 end
 
+end
 end

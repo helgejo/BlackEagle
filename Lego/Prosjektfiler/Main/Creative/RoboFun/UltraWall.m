@@ -1,3 +1,4 @@
+function [] = ultrawall()
 %%BETA!
 %% Egen kreativ oppgave " UltraWall"
 % ING100 Gruppe 1401 "Daniel Løvik" 2014
@@ -71,4 +72,4 @@ disp(sprintf('NXT har kjørt %d', posdata.Position));
 
 % Close NXT connection.
 COM_CloseNXT(handle_NXT);
-
+end
