@@ -107,9 +107,10 @@ function [] = main()
     hold on;
 
     %% Main rutine som kjører roboten og oppdaterer grafer imens til knapp 1 blir trykket og run = false
+    tic;
     while run
         % Tids beregninger
-        tid(end+1)=cputime-startTid;
+        tid(end+1)=toc;
         deltaTid(end+1)=tid(end)-tid(end-1);
 
         % les lys sensor
@@ -141,8 +142,8 @@ function [] = main()
             map=rmap; 
         end
 
-        % Beregn motor pådrag
-        [paadragB(end+1),paadragC(end+1)] = ???; % Legg inn pådrag ihht retning
+        % Beregn motor pådrag basert på lys avvik fra 0 punkt
+        [paadragB(end+1),paadragC(end+1)] = Autofunc(avvikL(end)); % Legg inn pådrag ihht retning
 
         % Send til motorene
         motorB.Power = paadragB(end);
@@ -181,8 +182,10 @@ function [] = main()
         % Tegn figurer
         drawnow
 
-        %Sjekk om programmet skal avsluttes
-        if ??? % Kan lengdemåling brukes? Evt. Når lysmåling plutselig peaker så stopper den. Beste er nok å bruke begge
+        %Sjekk om programmet skal avsluttes. Det sjekkes om lysverdi
+        %overstiger en gitt verdi. Dette tolkes som robot har kjørt av
+        %banen.
+        if  avvikL(end) >= 100 % 
             run = false;
         end    
     end

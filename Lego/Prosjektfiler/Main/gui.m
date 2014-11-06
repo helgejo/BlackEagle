@@ -22,12 +22,14 @@ while n>0
                     case 1
                            m2_1 = 1
                            while m2_1 > 0
-                                switch menu('Spill', 'CannonGame', 'Reaksjonstest', 'Tilbake')
+                                switch menu('Spill', 'CannonGame', 'Reaksjonstest1','Reaksjonstest2','Tilbake')
                                     case 1
                                         cannonGame()
                                     case 2
-                                        reaction()
+                                        Reaction1()
                                     case 3
+                                        Reaction2()
+                                    case 4
                                         m2_1 = 0; % Gå tilbake til forrige meny
                                 end
                            end
@@ -58,7 +60,7 @@ while n>0
                                     case 4
                                         m2_3 = 0; % Gå tilbake til forrige meny
                                 end
-                           end
+                            end
                     case 4
                         plotTime();
                     case 5
