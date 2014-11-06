@@ -1,20 +1,20 @@
-function [] = main()
-    %% Auto kjørings funksjon
+function [] = auto()
+    %% Auto kjÃ¸rings funksjon
     % 02.11.2014
     % kreativ del av INT100 prosjekt 
     % Gruppe 1401
     % ***************************
-    % Dette er en kreativ oppgave hvor roboten skal kjøre gjennom løypa
+    % Dette er en kreativ oppgave hvor roboten skal kjÃ¸re gjennom lÃ¸ypa
     % automatisk. Her er joystick tatt ut og erstattet med kode som
-    % beregner motorpådrag i forhold til derivert. 
+    % beregner motorpÃ¥drag i forhold til derivert. 
 
     %% Initialiserer NXT
     initNXT();
-    handle_NXT = COM_OpenNXT();     % etablerer nytt håndtak
-    COM_SetDefaultNXT(handle_NXT);	% setter globalt standard-håndtak
+    handle_NXT = COM_OpenNXT();     % etablerer nytt hÃ¥ndtak
+    COM_SetDefaultNXT(handle_NXT);	% setter globalt standard-hÃ¥ndtak
 
     %% Bruker input for hvor ofte grafene skal oppdateres
-    prompt={'Tast inn et tall fra 0 til 100000. Høyere tall gir bedre styring via joystick, mens lavere gir oftere oppdatering av figurere og grafer: '};
+    prompt={'Tast inn et tall fra 0 til 100000. HÃ¸yere tall gir bedre styring via joystick, mens lavere gir oftere oppdatering av figurere og grafer: '};
     name='Graf oppdateringsrate';
     numlines=1;
     defaultanswer={'10'};
@@ -23,36 +23,36 @@ function [] = main()
 
     %% Initialiserer sensorer og motorer
     OpenLight(SENSOR_3,'ACTIVE');                   % Lys sensor
-    motorB = NXTMotor('B','SmoothStart',true);      % Init motor b (høyre)
+    motorB = NXTMotor('B','SmoothStart',true);      % Init motor b (hÃ¸yre)
     motorC = NXTMotor('C','SmoothStart',true);      % Init motor c (venste)
 
     %% Initialiser variabler
-    run = true;                                     % loop variabel, settes til false for å avslutte programmet
+    run = true;                                     % loop variabel, settes til false for Ã¥ avslutte programmet
     tid=0;                                          % tidsvektor
     deltaTid=0;                                     % tidsendringsvektor
-    paadragB = 0;                                   % pådrag motor B
-    paadragC = 0;                                   % pådrag motor C
-    lys = 0;                                        % måling fra lyssensor
-    lysFilt=0;                                      % filtrert lysmåling
+    paadragB = 0;                                   % pÃ¥drag motor B
+    paadragC = 0;                                   % pÃ¥drag motor C
+    lys = 0;                                        % mÃ¥ling fra lyssensor
+    lysFilt=0;                                      % filtrert lysmÃ¥ling
     lysNp=1023/2;                                   % Maksverdien fra lyssensor
     avvikL=0;                                       % vektor for filtrert lysverdi avviket fra nullpunkt
     avvikA=0;                                       % vektor for integrert lysverdi = arealet A(t)
     avvikA2=0;                                      % vektor for summen av arealet (integralet fra 0 til t)
     plotTeller = 0;                                 % teller for hvor ofte det skal plottes
-    verdi=0;                                        % vektor for verdien som blir målt
+    verdi=0;                                        % vektor for verdien som blir mÃ¥lt
     deriv=0;                                        % vektor for de deriverte av avviket
-    rettning=0;                                     % vektor som beskriver rettning på avviket.
+    rettning=0;                                     % vektor som beskriver rettning pÃ¥ avviket.
     startTid=cputime;                               % starttidspunkt
-    speed= 0;                                       % Fartsmåling
-    screen = get(0,'screensize');                   % Skjermstørrelse
-    [rArrow, rmap] = imread('rarrow.jpg');          % Høyre pil for å angi retning
-    [lArrow, lmap] = imread('larrow.jpg');          % Venstre pil for å angi retning
-    [lrArrow, lrmap] = imread('lrarrow.png');       % Venstre/Høyre pil for å angi retning
+    speed= 0;                                       % FartsmÃ¥ling
+    screen = get(0,'screensize');                   % SkjermstÃ¸rrelse
+    [rArrow, rmap] = imread('rarrow.jpg');          % HÃ¸yre pil for Ã¥ angi retning
+    [lArrow, lmap] = imread('larrow.jpg');          % Venstre pil for Ã¥ angi retning
+    [lrArrow, lrmap] = imread('lrarrow.png');       % Venstre/HÃ¸yre pil for Ã¥ angi retning
     map=lrmap;                                      % Variabel som angir map for retningspil
     arrow=lrArrow;                                  % Angir hvilken retningspil som skal brukes
     w = 2;                                          % Variabel til avsluttende meny
     h = 0;                                          % Messagebox ved avslutning
-    LenRead = 0;                                    % Vector for avstandsmåling
+    LenRead = 0;                                    % Vector for avstandsmÃ¥ling
    
     %% Initialiserer figurer med bruk av handles
     % Steng ned eksisterende figurer
@@ -96,7 +96,7 @@ function [] = main()
     subplot(2,1,1)
     plot4_1=plot(tid,lysFilt,tid,lys);
     set(plot3_1,'Ydata', lysFilt , 'Xdata', tid );
-    title('Filtrert Lysmålig: Blå, Lysmåling: Rød');
+    title('Filtrert LysmÃ¥lig: BlÃ¥, LysmÃ¥ling: RÃ¸d');
     hold on;
     %Derviert av filtrert lysverdi
     subplot(2,1,2)
@@ -106,7 +106,7 @@ function [] = main()
     %axis([0,tid(end),-1000,1000]);
     hold on;
 
-    %% Main rutine som kjører roboten og oppdaterer grafer imens til knapp 1 blir trykket og run = false
+    %% Main rutine som kjÃ¸rer roboten og oppdaterer grafer imens til knapp 1 blir trykket og run = false
     tic;
     while run
         % Tids beregninger
@@ -125,25 +125,25 @@ function [] = main()
         % Derivasjon av lysignalet
         deriv(end+1)=derivFunk(tid,avvikL)
 
-        % Har roboten rettning mot lysere eller mørkere side
+        % Har roboten rettning mot lysere eller mÃ¸rkere side
         rettning(end+1)=retFunk(deriv(end),rettning(end))
 
         % utregning av konkurranse poeng
         verdi(end+1)=tid(end)*100+avvikA2(end);
 
-         % Sett bilde som viser retning basert på derivert
+         % Sett bilde som viser retning basert pÃ¥ derivert
             % 1 angir retning mot lysere side (venstre)
          if rettning(end) > 0;
             arrow=lArrow;
             map=lmap;
-            % -1 angir retning mot mørkere side (høyre)
+            % -1 angir retning mot mÃ¸rkere side (hÃ¸yre)
         elseif rettning(end) < 0;
             arrow=rArrow;
             map=rmap; 
         end
 
-        % Beregn motor pådrag basert på lys avvik fra 0 punkt
-        [paadragB(end+1),paadragC(end+1)] = Autofunc(avvikL(end)); % Legg inn pådrag ihht retning
+        % Beregn motor pÃ¥drag basert pÃ¥ lys avvik fra 0 punkt
+        [paadragB(end+1),paadragC(end+1)] = Autofunc(avvikL(end)); % Legg inn pÃ¥drag ihht retning
 
         % Send til motorene
         motorB.Power = paadragB(end);
@@ -154,10 +154,10 @@ function [] = main()
         % Get speed data and calculate speed
         sBdata = motorB.ReadFromNXT(); % hent motorinformasjon 
         sCdata = motorC.ReadFromNXT(); % hent motorinformasjon 
-        LenRead(end+1) = (Deg2Dist(sBdata.Position)+ Deg2Dist(sCdata.Position))/2;  % Gjennomsnitt avstand på begge motorer
+        LenRead(end+1) = (Deg2Dist(sBdata.Position)+ Deg2Dist(sCdata.Position))/2;  % Gjennomsnitt avstand pÃ¥ begge motorer
         speed(end+1) = round(((LenRead(end)-LenRead(end-1))/1000) / deltaTid(end)); % delta avstand (m) / delta tid (s)
 
-        % Plot figurer hvis plot frekvens er nådd
+        % Plot figurer hvis plot frekvens er nÃ¥dd
         if plotTeller > plotFrek
             figure(1) 
                 set(plot1_1,'Ydata', avvikA2 , 'Xdata',  tid);
@@ -183,7 +183,7 @@ function [] = main()
         drawnow
 
         %Sjekk om programmet skal avsluttes. Det sjekkes om lysverdi
-        %overstiger en gitt verdi. Dette tolkes som robot har kjørt av
+        %overstiger en gitt verdi. Dette tolkes som robot har kjÃ¸rt av
         %banen.
         if  avvikL(end) >= 100 % 
             run = false;
@@ -208,10 +208,10 @@ function [] = main()
     subplot(4,1,1)
     plot(tid,avvikA2);
     title('Totalt avvik: Integrert lysverdi fra t=0 til t')
-    %Rettning på avvik
+    %Rettning pÃ¥ avvik
     subplot(4,1,2)
     plot(tid,rettning);
-    title('Har roboten retning mot (-1)mørk eller (1)lys side');
+    title('Har roboten retning mot (-1)mÃ¸rk eller (1)lys side');
     axis([0,tid(end),-1.5,1.5]);
     %Verdi i konkurasne ut fra gitt formel
     subplot(4,1,3)
@@ -224,11 +224,11 @@ function [] = main()
 
     % Plot figur 2
     figure('Name','Retning','Position',[screen(3)/8, screen(4)/8,3*screen(3)/8, 2.8*screen(4)/8],'NumberTitle','off');
-    %Pådrag motor B
+    %PÃ¥drag motor B
     subplot(2,1,1)
     plot(tid,paadragB)
     title('Motor B');
-    %Pådrag motor C
+    %PÃ¥drag motor C
     subplot(2,1,2)
     plot(tid,paadragC)
     title('Motor C');
@@ -253,14 +253,14 @@ function [] = main()
     %Lysverdi og Filtrert lysverdi
     subplot(2,1,1)
     plot(tid,lysFilt,tid,lys);
-    title('Filtrert Lysmåling: Blå, Lysmåling: Rød');
+    title('Filtrert LysmÃ¥ling: BlÃ¥, LysmÃ¥ling: RÃ¸d');
     %Derviert av filtrert lysverdi
     subplot(2,1,2)
     plot(tid,deriv);
     title('Derivert av filtrert lysverdi');
     axis([0,tid(end),-1000,1000])
 
-    % Gi beskjed at bruker må taste key på tastatur for å stenge figurer.
+    % Gi beskjed at bruker mÃ¥ taste key pÃ¥ tastatur for Ã¥ stenge figurer.
     if h == 0
         h = msgbox('Press any key on keyboard to close figures and return to menu','Message','help')
     end
