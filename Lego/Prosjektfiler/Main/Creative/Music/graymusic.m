@@ -31,6 +31,8 @@ RoboPrec= 75;
 Mlen= 1000;
 Mtone= 200;
 engine=('B');
+templys = 0;
+lysneg = 0;
       
 
 %% Functions
@@ -84,15 +86,15 @@ engine=('B');
         end
 prompt={'How long in ms should the sound play per cm? Default is 1000 (1cm=1s). Higher number give longer tones',...
         'Input robot speed? Default is 10 and maks is 100',...
-        'Input robot light reading precision between 0 - 100? Lower number is more accurate. Default is 75'};
+        'Input robot light reading precision between 0 - 100? Lower number is more accurate. Default is 20'};
 name='Input for light to music function';
 numlines=1;
-defaultanswer={'1000','10','75'};
+defaultanswer={'100','10','20'};
 answer=inputdlg(prompt,name,numlines,defaultanswer);
         %Lenprompt = 'How long in ms should the sound play per cm? Default is 1000 (1cm=1s). Higher number give longer tones';
         SoundLen = str2double(answer(1));
             if isempty(SoundLen)
-                SoundLen = 1000;
+                SoundLen = 100;
             end
             
         %Speedprompt = 'Input robot speed? Default is 10 and maks is 100';
@@ -104,7 +106,7 @@ answer=inputdlg(prompt,name,numlines,defaultanswer);
         %Precprompt = 'Input robot light reading precision between 0 - 100? Lower number is more accurate. Default is 75';
         RoboPrec = str2double(answer(3)); 
             if or(isempty(RoboPrec),RoboPrec > 360) 
-                RoboPrec = 75;
+                RoboPrec = 20;
             end
         RoboPrec = ceil(Dist2Deg(RoboPrec))
     end
@@ -145,6 +147,8 @@ hold on;
     motorC = NXTMotor('C','Power',RoboSpeed);
     motorB.SendToNXT();
     motorC.SendToNXT();
+    
+ index = 0
 %% Drive and collect measurments
 while LenRead < TotLen;
     % when lightsensor detects a major change larger than RoboPrec then 
@@ -153,16 +157,35 @@ while LenRead < TotLen;
     data = motorB.ReadFromNXT(); % hent motorinformasjon 
     lys(end+1)=GetLight(SENSOR_3);
     lysFilt(end+1)=Lfilter([lysFilt(end),lys(end)], RoboPrec);
-    
-    if abs(lysFilt(end)-lysFilt(end-1))> 0;
-        distdeg = motorC.ReadFromNXT();
-        Mlen(end+1)= Deg2Dist(distdeg.Position)*SoundLen;
-        Mtone(end+1) = LtoHZ(lysFilt(end-1));
-        motorC.ResetPosition(); % nullstill vinkelteller
+    deltaLys = lysFilt(end)-lysFilt(end-1);
+
+    if deltaLys < 0
+        templys(end+1) = lysFilt(end);
+        lysneg = 1;
+    elseif deltaLys == 0
+        if lysneg == 1
+            templys(end+1) = lysFilt(end);
+        end
     else
-        Mlen(end+1)= Mlen(end);
-        Mtone(end+1) = Mtone(end);
+       if lysneg == 1 
+           distdeg = motorC.ReadFromNXT();
+           Mtone(end+1) = LtoHZ(mean(templys))
+           Mlen(end+1)= Deg2Dist(distdeg.Position)*SoundLen
+           motorC.ResetPosition(); % nullstill vinkelteller
+           templys = 0;
+           lysneg = 0;
+       end
     end
+    
+%     if abs(lysFilt(end)-lysFilt(end-1))> 0;
+%         distdeg = motorC.ReadFromNXT();
+%         Mlen(end+1)= Deg2Dist(distdeg.Position)*SoundLen;
+%         Mtone(end+1) = LtoHZ(lysFilt(end-1));
+%         motorC.ResetPosition(); % nullstill vinkelteller
+%     else
+%         Mlen(end+1)= Mlen(end);
+%         Mtone(end+1) = Mtone(end);
+%     end
     LenRead = Deg2Dist(data.Position);
 end
 
@@ -178,31 +201,31 @@ mbtarget=100;
 mctarget=100;
 while i < length(Mlen);
     NXT_PlayTone(Mtone(i),Mlen(i));
-    
+    pause((Mlen(i)/SoundLen/1000)+0.2);
     %Do the boogie to the lovely music
-    if engine == 'B'
-        if mbtarget == 100;
-            motorC.Stop;
-            motorB = NXTMotor('B','Power',100*directB);
-            motorB.SmoothStart = false;
-            motorB.SendToNXT();
-            mbtarget=0;
-            directB= directB*-1;
-        end
-        engine = 'C';
-        mbtarget=mbtarget+1;
-    else
-        if mctarget == 100;
-            motorB.Stop;
-            motorC = NXTMotor('C','Power',100*directC);
-            motorC.SmoothStart = false;
-            motorC.SendToNXT();
-            mctarget=0;
-            directC= directC*-1;
-        end
-        engine = 'B';
-        mctarget=mctarget+1;
-    end    
+%     if engine == 'B'
+%         if mbtarget == 100;
+%             motorC.Stop;
+%             motorB = NXTMotor('B','Power',50*directB);
+%             motorB.SmoothStart = true;
+%             motorB.SendToNXT();
+%             mbtarget=0;
+%             directB= directB*-1;
+%         end
+%         engine = 'C';
+%         mbtarget=mbtarget+1;
+%     else
+%         if mctarget == 100;
+%             motorB.Stop;
+%             motorC = NXTMotor('C','Power',50*directC);
+%             motorC.SmoothStart = true;
+%             motorC.SendToNXT();
+%             mctarget=0;
+%             directC= directC*-1;
+%         end
+%         engine = 'B';
+%         mctarget=mctarget+1;
+%     end    
     i=i+1;
 end
 
