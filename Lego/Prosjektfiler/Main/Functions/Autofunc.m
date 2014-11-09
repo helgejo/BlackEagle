@@ -2,27 +2,31 @@ function [motorB,motorC] = Autofunc(avvikL)
 %Beregner pådrage til hver motor ut fra lysverdi avvik fra nullpunkt. 
 %   Gir ut motorB og motorC pådrag som vektor
     temp = 0.23*abs(avvikL); % bruker 22% av absolutt verdi til avviket. 
+    Autospeed = 13;
+    TopValue = 50;
+    BotValue = -70;
+    
     if avvikL > 0
-        motorB = 15 - temp; 
-        motorC = 15 + temp;
+        motorB = Autospeed - temp; 
+        motorC = Autospeed + temp;
     elseif avvikL < 0
-        motorB = 15 + temp;
-        motorC = 15 - temp; 
+        motorB = Autospeed + temp;
+        motorC = Autospeed - temp; 
     else
-        motorB = 15;
-        motorC = 15;
+        motorB = Autospeed;
+        motorC = Autospeed;
     end
     
-    if motorB > 50
-        motorB = 50;
-    elseif motorB < -70;
-        motorB = -70;
+    if motorB > TopValue
+        motorB = TopValue;
+    elseif motorB < BotValue;
+        motorB = BotValue;
     end
     
-    if motorC > 50
-        motorC = 50;
-    elseif motorC < -70;
-        motorC = -70;
+    if motorC > TopValue
+        motorC = TopValue;
+    elseif motorC < BotValue;
+        motorC = BotValue;
     end
     motorB = floor(motorB);
     motorC = floor(motorC);

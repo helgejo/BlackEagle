@@ -23,55 +23,20 @@ motorC = NXTMotor('C','SmoothStart',true); % Init motor c (venste)
 %% Initialiser variabler
 lys = 0; %m?ling fra lyssensor
 lysFilt=0; %filtrert lysm?ling
-RoboSpeed = 30; %Robot speed m/s
+RoboSpeed = 10; %Robot speed m/s
 TotLen = 300; % Total length robot should drive
 LenRead=5;
-SoundLen= 1000;
-RoboPrec= 75;
-Mlen= 1000;
+SoundLen= 10;
+RoboPrec= 5;
+Mlen= 0;
 Mtone= 200;
-engine=('B');
 templys = 0;
 lysneg = 0;
-      
+i=1;
+danceDirect=1;
+danceSpeed=15;      
 
-%% Functions
-
-%     function [out] = LtoHZ(l)
-%         x= 13800/1023;
-%         out = (x * l)+200
-%         if out > 14000
-%             out = 14000
-%         end
-%         
-%         if out < 200
-%             out = 200
-%         end
-%     end
-%     
-%     function [out] = Dist2Deg(dist)
-%         WheelCirc = 56*pi;
-%         out = (dist/WheelCirc)*360;
-%     end
-%     
-%     function [out] = Deg2Dist(deg)
-%         WheelCirc = 56*pi;
-%         out =  WheelCirc*(deg/360);
-%     end
-% 
-%     function [out] = Lfilter(in, Prec)
-%         %Filtrerer en input vektor til et tall ut  
-%         temp = in(end)-in(end-1);
-%         % if change is less than +-Prec then take last value instead
-%         if temp < Prec && temp > -Prec
-%             out = in(end-1);
-%         % else take the new light reading
-%         else
-%             out = in(end);
-%         end
-%     end
-
-    function [TotLen,SoundLen,RoboSpeed,RoboPrec]=menuCh()
+function [TotLen,SoundLen,RoboSpeed,RoboPrec]=menuCh()
         % Menu Choices
 
         switch menu('Choose length robot should drive to measure: ', 'A3', 'A4', 'A5','Back')
@@ -84,17 +49,17 @@ lysneg = 0;
             case 4
                 main();
         end
-prompt={'How long in ms should the sound play per cm? Default is 1000 (1cm=1s). Higher number give longer tones',...
-        'Input robot speed? Default is 10 and maks is 100',...
-        'Input robot light reading precision between 0 - 100? Lower number is more accurate. Default is 20'};
+prompt={'Sound length multiplier? Default is 1 (1cm=1ms). Higher number give longer tones',...
+        'Input robot speed when measuring? Default is 10 and maks is 100',...
+        'Input robot light reading precision between 0 - 100? Lower number is more accurate. Default is 5'};
 name='Input for light to music function';
 numlines=1;
-defaultanswer={'100','10','20'};
+defaultanswer={'1','10','5'};
 answer=inputdlg(prompt,name,numlines,defaultanswer);
         %Lenprompt = 'How long in ms should the sound play per cm? Default is 1000 (1cm=1s). Higher number give longer tones';
-        SoundLen = str2double(answer(1));
+        SoundLen = str2double(answer(1))*10;
             if isempty(SoundLen)
-                SoundLen = 100;
+                SoundLen = 10;
             end
             
         %Speedprompt = 'Input robot speed? Default is 10 and maks is 100';
@@ -106,20 +71,18 @@ answer=inputdlg(prompt,name,numlines,defaultanswer);
         %Precprompt = 'Input robot light reading precision between 0 - 100? Lower number is more accurate. Default is 75';
         RoboPrec = str2double(answer(3)); 
             if or(isempty(RoboPrec),RoboPrec > 360) 
-                RoboPrec = 20;
+                RoboPrec = 5;
             end
         RoboPrec = ceil(Dist2Deg(RoboPrec))
     end
     
 %% Getting everything ready
-     
 [TotLen, SoundLen, RoboSpeed,RoboPrec] = menuCh(); %get user input
-%TotLenDeg = Dist2Deg(TotLen); % Convert length input to degrees
 motorB.ResetPosition(); % nullstill vinkelteller
 motorC.ResetPosition(); % nullstill vinkelteller
 lys = GetLight(SENSOR_3); % Get first light reading
-%lysFilt(end)=lys(end);
 screen = get(0,'screensize');
+
 %Main figur, Totalt avvik
 figure('Name','Hovedfigur - Press en tast for å komme tilbake til meny','Position',[screen(3)/8, screen(4)/8,3*screen(3)/8, 2.8*screen(4)/8],'NumberTitle','off');
 subplot(3,1,1)
@@ -127,11 +90,13 @@ plot1_1=plot((1:(length(Mlen))), Mlen);
 set(plot1_1,'Ydata', Mlen , 'Xdata', (1:(length(Mlen))) );
 hold on;
 title('Lyd data');
+
 % xlabel('Målepunkt');
 ylabel('Lydlengde');
 subplot(3,1,2)
 plot1_2=plot((1:(length(Mtone))), Mtone);
 set(plot1_2,'Ydata', Mtone , 'Xdata', (1:(length(Mtone))) );
+
 %xlabel('Målepunkt');
 ylabel('Frekvens');
 hold on;
@@ -143,12 +108,11 @@ ylabel('Lys');
 hold on;
 
 % move forward with robospeed   
-    motorB = NXTMotor('B','Power',RoboSpeed);
-    motorC = NXTMotor('C','Power',RoboSpeed);
-    motorB.SendToNXT();
-    motorC.SendToNXT();
+motorB = NXTMotor('B','Power',RoboSpeed);
+motorC = NXTMotor('C','Power',RoboSpeed);
+motorB.SendToNXT();
+motorC.SendToNXT();
     
- index = 0
 %% Drive and collect measurments
 while LenRead < TotLen;
     % when lightsensor detects a major change larger than RoboPrec then 
@@ -159,33 +123,23 @@ while LenRead < TotLen;
     lysFilt(end+1)=Lfilter([lysFilt(end),lys(end)], RoboPrec);
     deltaLys = lysFilt(end)-lysFilt(end-1);
 
-    if deltaLys < 0
+    if deltaLys < 0;
         templys(end+1) = lysFilt(end);
         lysneg = 1;
-    elseif deltaLys == 0
-        if lysneg == 1
+    elseif deltaLys == 0;
+        if lysneg == 1;
             templys(end+1) = lysFilt(end);
         end
     else
-       if lysneg == 1 
+       if lysneg == 1;
            distdeg = motorC.ReadFromNXT();
-           Mtone(end+1) = LtoHZ(mean(templys))
-           Mlen(end+1)= Deg2Dist(distdeg.Position)*SoundLen
+           Mtone(end+1) = LtoHZ(mean(templys));
+           Mlen(end+1)= Deg2Dist(distdeg.Position)*SoundLen;
            motorC.ResetPosition(); % nullstill vinkelteller
            templys = 0;
            lysneg = 0;
        end
     end
-    
-%     if abs(lysFilt(end)-lysFilt(end-1))> 0;
-%         distdeg = motorC.ReadFromNXT();
-%         Mlen(end+1)= Deg2Dist(distdeg.Position)*SoundLen;
-%         Mtone(end+1) = LtoHZ(lysFilt(end-1));
-%         motorC.ResetPosition(); % nullstill vinkelteller
-%     else
-%         Mlen(end+1)= Mlen(end);
-%         Mtone(end+1) = Mtone(end);
-%     end
     LenRead = Deg2Dist(data.Position);
 end
 
@@ -193,39 +147,17 @@ end
 motorB.Stop;
 motorC.Stop;
 
-%% Play music (play vector if possible else create function with while loop)
-i=1;
-directB=1;
-directC=1;
-mbtarget=100;
-mctarget=100;
+%% Play music and dance
 while i < length(Mlen);
     NXT_PlayTone(Mtone(i),Mlen(i));
-    pause((Mlen(i)/SoundLen/1000)+0.2);
-    %Do the boogie to the lovely music
-%     if engine == 'B'
-%         if mbtarget == 100;
-%             motorC.Stop;
-%             motorB = NXTMotor('B','Power',50*directB);
-%             motorB.SmoothStart = true;
-%             motorB.SendToNXT();
-%             mbtarget=0;
-%             directB= directB*-1;
-%         end
-%         engine = 'C';
-%         mbtarget=mbtarget+1;
-%     else
-%         if mctarget == 100;
-%             motorB.Stop;
-%             motorC = NXTMotor('C','Power',50*directC);
-%             motorC.SmoothStart = true;
-%             motorC.SendToNXT();
-%             mctarget=0;
-%             directC= directC*-1;
-%         end
-%         engine = 'B';
-%         mctarget=mctarget+1;
-%     end    
+
+    %Do a boogie to the lovely music
+    motorB = NXTMotor('B','Power',danceSpeed*danceDirect);
+    motorC = NXTMotor('C','Power',danceSpeed*danceDirect*-1);
+    motorB.SendToNXT();
+    motorC.SendToNXT();
+    danceDirect = danceDirect * -1;
+    pause((Mlen(i))/1000)
     i=i+1;
 end
 

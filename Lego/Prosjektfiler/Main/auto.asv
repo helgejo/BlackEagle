@@ -155,7 +155,7 @@ function [] = auto()
         sBdata = motorB.ReadFromNXT(); % hent motorinformasjon 
         sCdata = motorC.ReadFromNXT(); % hent motorinformasjon 
         LenRead(end+1) = (Deg2Dist(sBdata.Position)+ Deg2Dist(sCdata.Position))/2;  % Gjennomsnitt avstand på begge motorer
-        speed(end+1) = round((((LenRead(end)-LenRead(end-1))) / deltaTid(end))); % delta avstand (mm) / delta tid (s)
+        speed(end+1) = round(((LenRead(end)-LenRead(end-1))/1000) / deltaTid(end)); % delta avstand (m) / delta tid (s)
 
         % Plot figurer hvis plot frekvens er nådd
         if plotTeller > plotFrek
