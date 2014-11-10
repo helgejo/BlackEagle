@@ -24,7 +24,6 @@ highLim = char(userInputs(3)); %higher limit of integral (in string form)
         screen = get(0,'screensize');
         figure('Position',[screen(3)/6, screen(4)/6,screen(3)/1.5, screen(4)/1.5]);
         set(gcf, 'KeyPressFcn', @keyDownListener, 'Name', 'Press any key to continue');
-
     end
 %%
 % KeyDownListener to stop program by pressing any button button
@@ -103,8 +102,6 @@ try %try settinging up and running the program
             IntofF = 0; % reset integral of f(x)
             subplot(5,1,3) % subplot 3 reset
             cla; %end suplot 3 reset
-            subplot(5,1,3)
-            cla;
             tic; % reset stop clock
         end
         drawnow; % force graphics to update

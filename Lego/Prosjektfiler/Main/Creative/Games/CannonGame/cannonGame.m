@@ -1,6 +1,14 @@
 function [] = cannonGame()
+% A simple game that simulates a projectil being shot from a cannon at an
+% angle between 0° and 90°.
+%   Game can be played alone or in multiplayer up to five player
+%   Players should see the shots they are making
+%   One game consist of 3, 5, 7 or 10 shots pr player
+%   A summary should be shown at the end
+%   There is a highscore list
+
 %%
-%constants
+% Constants
 screen = get(0,'screensize');
 chartratio=(550/1050)*screen(3)/screen(4); %ratio between plot axis times ratio between screen size
 chartaxis=[0,1050,0,550]; %Contant to lock the displayed axis slightly larger than possible height and length with an initial speed of 100 m/s
@@ -8,7 +16,7 @@ g=-9.81; %Gravitational acceleration
 initialSpeed = 100; %Shots intial speed m/s
 
 %%
-%init var
+% Initiate variables
 showangle=1; %Condition to run showangle function
 space = 0; %Continue variable
 stop = 0; %main loops variable
@@ -23,8 +31,8 @@ highscore=loadHighscore(); %structur variable used for highscores, and initially
 
 
 %%
-%initial game options, such as number of players, difficulty, highscore and
-%exit
+% Initial game options
+%such as number of players, difficulty, highscore and exit
 switch menu('Choose: ', 'Single player', 'Multiplayer', 'Highscore','Exit')
     case 1
         noplayers=1;
@@ -37,7 +45,7 @@ switch menu('Choose: ', 'Single player', 'Multiplayer', 'Highscore','Exit')
         noplayers=0;
 end
 if noplayers>0
-    switch menu('Choose difficulty:', 'easy', 'normal', 'hard');
+    switch menu('Choose difficulty:', 'easy', 'normal', 'hard'); % Game difficulty
     case 1
         difficulty =0.01; %change from one angle to the next in radians
     case 2
@@ -45,7 +53,7 @@ if noplayers>0
     case 3
         difficulty =0.03; %change from one angle to the next in radians
     end
-    switch menu('Number of shots:', '3', '5', '7', '10')
+    switch menu('Number of shots:', '3', '5', '7', '10') % Number of shots pr game
         case 1
             noshots = 3;
         case 2
@@ -58,14 +66,14 @@ if noplayers>0
 end
 
 %%
-%initializing figure by defining position on screen, the keydownlistnere
-%and removing the possibility to resize the figure.
+% Initialize figure
+% By defining position on screen, the keydownlistnere and removing the possibility to resize the figure.
 figure('Position',[screen(3)/6, screen(4)/6,screen(3)/1.5, screen(4)/1.5]);
 set(gcf, 'KeyPressFcn', @keyDownListener, 'Resize', 'off');
 
 %%
-%keyDownListener to know when "space" has been hit, also escape to stop
-%main loops
+%keyDownListener
+% to know when "space" has been hit, also escape to stop main loops
     function keyDownListener(src, event)
         switch event.Key
             case 'space'
@@ -252,7 +260,7 @@ if noplayers>1;
     playerno=1;
     while ~stop %main multiplayer game loop
         drawnow;
-        if showangle() %shot with the angle when player presses space
+        if showangle %shot with the angle when player presses space
             showAngle();
         elseif space && ~dispshot %shot with the angle when player presses space
             [shotlength(playerno,shotno), shotheight(playerno,shotno)] = shootCannon();

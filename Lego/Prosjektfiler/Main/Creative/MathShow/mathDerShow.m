@@ -25,7 +25,7 @@ endXinput = char(userInputs(3)); %highest x
 
     end
 %%
-% KeyDownListener to stop program by pressing any button button
+% KeyDownListener to stop program by pressing any button
     function keyDownListener(src, event)
         run = 0;
     end

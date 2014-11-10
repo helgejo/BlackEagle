@@ -27,6 +27,8 @@ loops = [0]; % vector for number of loops
 avgPT = [0]; % vector for average plot time
 avgST = [0]; % vector for average set time
 avgRT = [0]; % vector for average refresh time
+%%
+%initiate plots
 subplot(3,1,1) % set up subplot 1 for plot
 hold on;
 plotplot = plot(loops,plotTime, '-b');
@@ -109,4 +111,3 @@ end
 % end the program
 close gcf;
 end
-
