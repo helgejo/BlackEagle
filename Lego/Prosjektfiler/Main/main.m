@@ -125,9 +125,10 @@ function [] = main()
     hold on;
 
     %% Main rutine som kjører roboten og oppdaterer grafer imens til knapp 1 blir trykket og run = false
+    tic;
     while run
         % Tids beregninger
-        tid(end+1)=cputime-startTid;
+        tid(end+1)=toc;
         deltaTid(end+1)=tid(end)-tid(end-1);
 
         % les lys sensor
