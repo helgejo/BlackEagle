@@ -33,11 +33,12 @@ function []=lydsensorclap()
     clapcount = 0; % Klappteller
     clapreg = false; % Klapregistrering
     claptime = [1] ; % Tidsvektor for bruk i cputime kode til måling mellom klapp
+    Start = cputime
 
 
     while Progstart
             % Plotter nåværende lyd verdier og ultraverdier
-            tid(end+1)=cputime-ProgStart;
+            tid(end+1)=cputime-Start;
             slyd(end+1) = GetSound(SENSOR_2);
             figure(1)
             plot(tid,slyd);
