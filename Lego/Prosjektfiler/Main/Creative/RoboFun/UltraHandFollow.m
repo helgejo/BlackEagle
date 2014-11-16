@@ -27,30 +27,28 @@ OpenSound(SENSOR_2, 'DB' );
 slyd = [0]; %Lydvektor
 sUltra = [0]; % Ultravektor
 tid = [0]; % Tidsvektor
-ultrastart = 0; % Kontroll løkke for lys registering/endring
+ultrastart = 1; % Kontroll løkke for lys registering/endring
 ProgStart = cputime; % Logger tiden programmet starter
 Motorer = NXTMotor('BC') ; % Bruker begge motorene synkront
-Venstre = NXTMotor('B') ; % Bruker bare venstre motor
-Hoyre = NXTMotor('C'); % Bruker bare høyre motor
 breakcount = 0; % Hvis 1 = Tvungen stopp av NXT og While løkke
 
 
-%Ultra løkke
-while GetUltrasonic(SENSOR_4) > 90 % Kjører så lenge verdier fra Ultra > 90
-    pause(0.7) % Venter 700ms
-    disp('Objekt ikke funnet') 
-%     Venstre.Power = 10; % Venstre motor kjører med motorkraft på 10%
-%     Venstre.SendToNXT(); % Sender kommandoen til NXT
-    
-    if GetUltrasonic(SENSOR_4) < 90 % Kjører når Ultra verdi er < 30
-    pause(0.7) % Venter 700ms
-    disp('Objekt funnet') 
-    Venstre.Stop('off');  % Skrur av Venstre motor
-    break;
-    end
-end
+% %Ultra løkke
+% while GetUltrasonic(SENSOR_4) > 90 % Kjører så lenge verdier fra Ultra > 90
+%     pause(0.7) % Venter 700ms
+%     disp('Objekt ikke funnet') 
+% %     Venstre.Power = 10; % Venstre motor kjører med motorkraft på 10%
+% %     Venstre.SendToNXT(); % Sender kommandoen til NXT
+%     
+%     if GetUltrasonic(SENSOR_4) < 90 % Kjører når Ultra verdi er < 30
+%     pause(0.7) % Venter 700ms
+%     disp('Objekt funnet') 
+%     Venstre.Stop('off');  % Skrur av Venstre motor
+%     break;
+%     end
+% end
 
-ultrastart = ultrastart+1; % Settes til 1, løkken under aktiveres.
+% ultrastart = ultrastart+1; % Settes til 1, løkken under aktiveres.
 
         
 while ultrastart == 1
@@ -60,11 +58,16 @@ while ultrastart == 1
         subplot(2,1,2)
         plot(tid,sUltra);
         title('Ultralyd måling');
+        ylabel({'Ultraverdi'});
+        xlabel({'Tid'});
         slyd(end+1) = GetSound(SENSOR_2);
         figure(1)
         subplot(2,1,1)
         plot(tid,slyd);
         title('Måling av lydnivå')
+        xlabel({'Tid'});
+        ylabel({'Lydverdi'});
+        
 % Ultrastart On
 if breakcount == 0;
    
@@ -72,21 +75,22 @@ if breakcount == 0;
      Motorer.Power = 80; % Kjører med 80% kraft.
      Motorer.SendToNXT(); 
  
-     elseif (GetUltrasonic(SENSOR_4)>= 15) && (GetUltrasonic(SENSOR_4)<80) % Avstand mellom 15 og 80cm.
+     elseif (GetUltrasonic(SENSOR_4)>= 25) && (GetUltrasonic(SENSOR_4)<80) % Avstand mellom 15 og 80cm.
      Motorer.Power = GetUltrasonic(SENSOR_4)-10; % Nåværende avstandsverdi minus 10. Sendes som kraft % til NXT.
      Motorer.SendToNXT();
-   elseif GetUltrasonic(SENSOR_4)<= 14 %Avstand under 14cm, kjører bakover.
+   elseif GetUltrasonic(SENSOR_4)<= 23 %Avstand under 23cm, kjører bakover.
      Motorer.Power = GetUltrasonic(SENSOR_4)-30; % Nåværende avstandsverdi minus 30. Sendes som kraft % til NXT.
      Motorer.SendToNXT();
-     
-   elseif GetSound(SENSOR_2) >900; % Ved høy lyd fra rop eller klapp aktiveres "Force stop".
+    else
+    Motorer.Stop('brake'); % Bremser
+       
+     end
+   if GetSound(SENSOR_2) >900; % Ved høy lyd fra rop eller klapp aktiveres "Force stop".
      Motorer.Stop('off');  % Skrur av motor
      breakcount = breakcount +1; % Stopper Ultrastart
      ultrastart = false; % Stopper While løkke
      disp('Force stop aktivert')
-   else
-       Motorer.Stop('brake'); % Bremser
-       
+
    end
 end
  end
