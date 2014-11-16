@@ -21,26 +21,27 @@ function []=lydsensorclap()
 
 
     %% Initialiserer Lyd sensor
-    %
+    OpenUltrasonic(SENSOR_4);
     OpenSound(SENSOR_2, 'DB' ); %  Åpner lydsensor og leser data i DB
 
 
     %% Div variabler
     slyd = [0];% Lydvektor
+    sUltra = [0];% Ultravektor
     tid = [0]; % Tidsvektor
     Progstart = true; % Variable for While kontroll
     Fremover = NXTMotor('BC') ; % Kjører frem
     clapcount = 0; % Klappteller
     clapreg = false; % Klapregistrering
     claptime = [1] ; % Tidsvektor for bruk i cputime kode til måling mellom klapp
-    Start = cputime
+    Start = cputime;
 
 
     while Progstart
             % Plotter nåværende lyd verdier og ultraverdier
             tid(end+1)=cputime-Start;
             slyd(end+1) = GetSound(SENSOR_2);
-            figure(1)
+            subplot(2,1,1)
             plot(tid,slyd);
             title('Måling av lydnivå')
             ylabel({'Lydverdi'})
