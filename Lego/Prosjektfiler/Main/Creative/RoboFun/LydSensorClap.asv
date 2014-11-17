@@ -34,7 +34,7 @@ function []=lydsensorclap()
     clapcount = 0; % Klappteller
     clapreg = false; % Klapregistrering
     claptime = [1] ; % Tidsvektor for bruk i cputime kode til måling mellom klapp
-    Start = cputime;
+    Start = cputime; % Starttid
 
 
     while Progstart
@@ -48,7 +48,7 @@ function []=lydsensorclap()
             xlabel({'Tid'});
             sUltra(end+1) = GetUltrasonic(SENSOR_4);
             subplot(2,1,2)
-            plot(sUltra);
+            plot(tid,sUltra);
             title('Ultralyd måling');
             ylabel({'Ultraverdi'});
             xlabel({'Tid'});
@@ -59,9 +59,9 @@ function []=lydsensorclap()
                 % Ved godt klapp øker verdien til over 600
             Fremover.Power = 20 ; % Kjører frem med 20% kraft
             Fremover.SendToNXT(); % Sender til NXT
-            % Registrering av klapp + klappetid, sørger for at klapp bare
-            % registreres en gang over satt nivå
-            if ~clapreg 
+
+            if ~clapreg % Registrering av klapp + klappetid, sørger for at klapp bare
+                        % registreres en gang over satt nivå
                 clapcount = clapcount +1
                 claptime(end+1) = cputime;
                 clapreg = true; 
@@ -79,19 +79,25 @@ function []=lydsensorclap()
             % Ved 1 vanlig klapp og 2 kjappe klapp settes NXT i brems.
            if clapcount == 3   
                     Fremover.Stop('brake')
-                    posdata = Fremover.ReadFromNXT(); % Leser antall grader hjul har rotert.
 
-                    disp(sprintf('NXT har kjørt %d', posdata.Position)); % Viser antall grader.
-                    %Mulighet for formel for å vise distanse i cm.
 
                   % Ved nytt klapp etter 3 resettes klappteller og starter på 1.  
            elseif clapcount > 3
                   clapcount = (clapcount - clapcount) +1  
 
            end
+           if GetUltrasonic(SENSOR_4) < 25
+               Fremover.Stop('off');
+               Progstart = false;
 
     end
 end
+%%
+% Steng ned sensorer
+  CloseSensor(SENSOR_2);
+  CloseSensor(SENSOR_4);
 
+% Close NXT connection.
+COM_CloseNXT(handle_NXT);
 
 

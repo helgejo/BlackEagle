@@ -59,9 +59,9 @@ function []=lydsensorclap()
                 % Ved godt klapp øker verdien til over 600
             Fremover.Power = 20 ; % Kjører frem med 20% kraft
             Fremover.SendToNXT(); % Sender til NXT
-            % Registrering av klapp + klappetid, sørger for at klapp bare
-            % registreres en gang over satt nivå
-            if ~clapreg 
+
+            if ~clapreg % Registrering av klapp + klappetid, sørger for at klapp bare
+                        % registreres en gang over satt nivå
                 clapcount = clapcount +1
                 claptime(end+1) = cputime;
                 clapreg = true; 
@@ -92,6 +92,12 @@ function []=lydsensorclap()
 
     end
 end
+%%
+% Steng ned sensorer
+  CloseSensor(SENSOR_2);
+  CloseSensor(SENSOR_4);
 
+% Close NXT connection.
+COM_CloseNXT(handle_NXT);
 
 
