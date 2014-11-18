@@ -1,13 +1,13 @@
-function []=ultrahandfollow()
+function []=UltraDrive()
 %% Oppgave 9 "Følg objekt" fra "Forslag til kreative oppgaver"
 % ING100 Gruppe 1401 "Daniel Løvik" 2014
 
 % Beskrivelse av program:
-% NXT starter med å vri seg i en sirkelbevegelse til Ultralyd sensoren
-% finner et objekt innenfor 90 cm.
-% NXT vil da kjøre mot objektet med motorkraft som avtar jo nærmere
-% objektet er.
-% Kommer objektet under "smertegrensen på 14cm" så rygger roboten.
+% NXT kjører mot et objekt til den er innenfor grenseområdet mellom 23 og
+% 25 cm.
+% NXT vil da bremse og stå stille så lenge den er i grenseområdet, øker
+% avstanden kjører den framover, minker den rygger NXT.
+% Kommer objektet under "smertegrensen på 23cm" så rygger roboten.
 
 
 %% Initialiserer NXT
@@ -20,8 +20,8 @@ COM_SetDefaultNXT(handle_NXT);	% setter globalt standard-håndtak
 
 
 %% Sensorer aktiveres.
-OpenUltrasonic(SENSOR_4); 
-OpenSound(SENSOR_2, 'DB' );
+OpenUltrasonic(SENSOR_4); % Åpner Ultralydsensoren.
+OpenSound(SENSOR_2, 'DB' ); % Åpner lydsensoren og leser data i DB
 
 %% Diverse oppstarts variabler
 slyd = [0]; %Lydvektor
@@ -33,26 +33,9 @@ Motorer = NXTMotor('BC') ; % Bruker begge motorene synkront
 breakcount = 0; % Hvis 1 = Tvungen stopp av NXT og While løkke
 
 
-% %Ultra løkke
-% while GetUltrasonic(SENSOR_4) > 90 % Kjører så lenge verdier fra Ultra > 90
-%     pause(0.7) % Venter 700ms
-%     disp('Objekt ikke funnet') 
-% %     Venstre.Power = 10; % Venstre motor kjører med motorkraft på 10%
-% %     Venstre.SendToNXT(); % Sender kommandoen til NXT
-%     
-%     if GetUltrasonic(SENSOR_4) < 90 % Kjører når Ultra verdi er < 30
-%     pause(0.7) % Venter 700ms
-%     disp('Objekt funnet') 
-%     Venstre.Stop('off');  % Skrur av Venstre motor
-%     break;
-%     end
-% end
-
-% ultrastart = ultrastart+1; % Settes til 1, løkken under aktiveres.
-
         
 while ultrastart == 1
-        % Plotter verdier inn i 2 plott på en figur
+        % Plotter Ultralyd, lyd og tids verdier underveis.
         sUltra(end+1) = GetUltrasonic(SENSOR_4);
         tid(end+1)=cputime-ProgStart;
         subplot(2,1,2)
@@ -75,7 +58,7 @@ if breakcount == 0;
      Motorer.Power = 80; % Kjører med 80% kraft.
      Motorer.SendToNXT(); 
  
-     elseif (GetUltrasonic(SENSOR_4)>= 25) && (GetUltrasonic(SENSOR_4)<80) % Avstand mellom 15 og 80cm.
+     elseif (GetUltrasonic(SENSOR_4)>= 25) && (GetUltrasonic(SENSOR_4)<80) % Avstand mellom 25 og 80cm.
      Motorer.Power = GetUltrasonic(SENSOR_4)-10; % Nåværende avstandsverdi minus 10. Sendes som kraft % til NXT.
      Motorer.SendToNXT();
    elseif GetUltrasonic(SENSOR_4)<= 23 %Avstand under 23cm, kjører bakover.

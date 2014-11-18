@@ -58,7 +58,7 @@ if breakcount == 0;
      Motorer.Power = 80; % Kjører med 80% kraft.
      Motorer.SendToNXT(); 
  
-     elseif (GetUltrasonic(SENSOR_4)>= 25) && (GetUltrasonic(SENSOR_4)<80) % Avstand mellom 15 og 80cm.
+     elseif (GetUltrasonic(SENSOR_4)>= 25) && (GetUltrasonic(SENSOR_4)<80) % Avstand mellom 25 og 80cm.
      Motorer.Power = GetUltrasonic(SENSOR_4)-10; % Nåværende avstandsverdi minus 10. Sendes som kraft % til NXT.
      Motorer.SendToNXT();
    elseif GetUltrasonic(SENSOR_4)<= 23 %Avstand under 23cm, kjører bakover.
