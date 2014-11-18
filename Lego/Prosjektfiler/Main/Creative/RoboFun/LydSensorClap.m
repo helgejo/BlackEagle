@@ -1,12 +1,11 @@
-function []=lydsensorclap()
+function []=ClapDrive()
 %% Oppgave 8 "NXT reaksjon på klapp" fra "Forslag til kreative oppgaver"
 % ING100 Gruppe 1401 "Daniel Løvik" 2014
 
 % Beskrivelse av program:
 % Roboten starter å kjøre fremover ved 1 kraftig klapp.
-% Lydverdiene plottes fortløpende.
-% Ved 2 hurtige kraftige klapp stopper roboten og en distanse tekst dukker
-% opp i kommando vinduet.
+% Lyd og ultralyd verdier plottes fortløpende.
+% Ved 2 hurtige kraftige klapp stopper roboten.
 % Ved nytt klapp resettes klapptelleren og settes til 1 mens koden kjører
 % runden på nytt.
 
@@ -21,8 +20,8 @@ function []=lydsensorclap()
 
 
     %% Initialiserer Lyd sensor
-    OpenUltrasonic(SENSOR_4);
-    OpenSound(SENSOR_2, 'DB' ); %  Åpner lydsensor og leser data i DB
+    OpenUltrasonic(SENSOR_4);   %  Åpner ultralydsensor.
+    OpenSound(SENSOR_2, 'DB' ); %  Åpner lydsensor og leser data i DB.
 
 
     %% Div variabler
@@ -38,7 +37,8 @@ function []=lydsensorclap()
 
 
     while Progstart
-            % Plotter nåværende lyd verdier og ultraverdier
+            % Plotter nåværende lyd verdier og ultraverdier samt tid ved
+            % hjelp av cputime.
             tid(end+1)=cputime-Start;
             slyd(end+1) = GetSound(SENSOR_2);
             subplot(2,1,1)
@@ -71,12 +71,12 @@ function []=lydsensorclap()
                 clapcount = clapcount +2
              end      
         else 
-            if clapreg 
+            if clapreg % Restter clapreg etter et registrert klapp.
                 clapreg = false;   
             end               
 
             end
-            % Ved 1 vanlig klapp og 2 kjappe klapp settes NXT i brems.
+            % Etter 1 vanlig klapp og 2 kjappe klapp settes NXT i brems.
            if clapcount == 3   
                     Fremover.Stop('brake')
 
@@ -86,9 +86,9 @@ function []=lydsensorclap()
                   clapcount = (clapcount - clapcount) +1  
 
            end
-           if GetUltrasonic(SENSOR_4) < 25
+           if GetUltrasonic(SENSOR_4) < 25 % Grense for auto stopp av robot ved under 25 cm i fra vegg.
                Fremover.Stop('off');
-               Progstart = false;
+               Progstart = false; % Hovedløkke stoppes.
 
     end
 end
