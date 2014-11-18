@@ -4,6 +4,8 @@ function [] = Reaction2()
 % Anders Svalestad 
 % 23.10.2014
 
+% Programmet har til hensikt å teste reaksjonstid sammen med 
+% tastatur "touch" ferdigheter til bruker 
 
 
 %%
@@ -11,7 +13,7 @@ clear
 clc
 
 %%
-% Inig
+% Init
 tid=[];
 
 %%
@@ -76,9 +78,10 @@ end
   
     
    end
-close all
+% Lukker alle figurer 
+   close all
 
-
+% Setter opp figur for resultat visning
   figure(1)
   
         axis([-20 00 -20 20]);
@@ -89,6 +92,7 @@ close all
         set(antallrunder, 'fontsize',20);
         set(Tiden, 'fontsize',20);
 
+% Hvis avslutt knapp blir trykket. Lukk figur og returner         
   if runder==0
       close gcf;
     gui();
