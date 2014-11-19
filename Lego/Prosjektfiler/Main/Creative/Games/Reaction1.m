@@ -61,7 +61,7 @@ clc
 switch menu('Start/Avbryt','Start','Avslutt')
     case 1
         steg = 1;
-        steg2=1;       
+        steg2= 1;       
         pause(rand*5);
     case 2
         steg = 0;
